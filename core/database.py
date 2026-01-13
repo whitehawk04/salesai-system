@@ -18,17 +18,13 @@ class MongoDB:
     def _ensure_connection(self):
         """Lazy initialization of MongoDB connection"""
         if self._client is None:
-            import ssl
-            import certifi
-            
+            # Simple connection - let pymongo handle SSL automatically
+            # MongoDB Atlas connection strings include SSL by default
             self._client = MongoClient(
                 settings.MONGODB_URI,
-                serverSelectionTimeoutMS=5000,  # 5 second timeout
-                connectTimeoutMS=10000,  # 10 second connection timeout
-                socketTimeoutMS=10000,   # 10 second socket timeout
-                tls=True,  # Enable TLS/SSL
-                tlsAllowInvalidCertificates=False,  # Validate certificates
-                tlsCAFile=certifi.where(),  # Use certifi's CA bundle
+                serverSelectionTimeoutMS=10000,  # 10 second timeout
+                connectTimeoutMS=20000,  # 20 second connection timeout
+                socketTimeoutMS=20000,   # 20 second socket timeout
             )
             self._db = self._client[settings.MONGODB_NAME]
     
