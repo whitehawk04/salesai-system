@@ -93,8 +93,8 @@ def create_sample_leads_and_sales():
         agent_id = agent['_id']
         print(f"\n  Agent: {agent['name']} ({agent_id})")
         
-        # Generate 8-15 leads per agent
-        num_leads = random.randint(8, 15)
+        # Generate 4-8 leads per agent (reduced for low-memory environments)
+        num_leads = random.randint(4, 8)
         agent_leads = []
         
         for i in range(num_leads):

@@ -76,10 +76,11 @@ def create_sample_data():
     start_of_month = datetime(now.year, now.month, 1)
     
     # Activity patterns for different performance levels
+    # Reduced numbers for low-memory environments (Render free tier)
     performance_patterns = {
-        "high": {"calls": (80, 120), "meetings": (35, 50), "leads": (25, 40), "deals": (12, 20)},
-        "medium": {"calls": (50, 80), "meetings": (20, 35), "leads": (15, 25), "deals": (8, 12)},
-        "low": {"calls": (20, 50), "meetings": (10, 20), "leads": (5, 15), "deals": (2, 8)},
+        "high": {"calls": (30, 40), "meetings": (15, 20), "leads": (10, 15), "deals": (5, 8)},
+        "medium": {"calls": (20, 30), "meetings": (10, 15), "leads": (8, 12), "deals": (3, 6)},
+        "low": {"calls": (10, 20), "meetings": (5, 10), "leads": (3, 8), "deals": (1, 4)},
     }
     
     # Assign performance levels to agents
@@ -102,61 +103,66 @@ def create_sample_data():
         
         print(f"\n  Generating data for {agent['name']} ({performance} performer)...")
         
+        # Generate activities in batches to reduce memory usage
+        from core.database import db
+        activities_batch = []
+        
         # Generate calls
         num_calls = random.randint(*pattern["calls"])
         for i in range(num_calls):
-            days_ago = random.randint(0, 28)
-            activity_date = start_of_month + timedelta(days=days_ago)
-            Activity.create(
-                activity_id=f"ACT{activity_counter:05d}",
-                agent_id=agent_id,
-                activity_type="call",
-                value=0,
-                notes=f"Customer outreach call {i+1}"
-            )
+            activities_batch.append({
+                "activity_id": f"ACT{activity_counter:05d}",
+                "agent_id": agent_id,
+                "activity_type": "call",
+                "value": 0,
+                "notes": f"Customer call {i+1}",
+                "created_at": datetime.now()
+            })
             activity_counter += 1
         
         # Generate meetings
         num_meetings = random.randint(*pattern["meetings"])
         for i in range(num_meetings):
-            days_ago = random.randint(0, 28)
-            activity_date = start_of_month + timedelta(days=days_ago)
-            Activity.create(
-                activity_id=f"ACT{activity_counter:05d}",
-                agent_id=agent_id,
-                activity_type="meeting",
-                value=0,
-                notes=f"Client meeting {i+1}"
-            )
+            activities_batch.append({
+                "activity_id": f"ACT{activity_counter:05d}",
+                "agent_id": agent_id,
+                "activity_type": "meeting",
+                "value": 0,
+                "notes": f"Meeting {i+1}",
+                "created_at": datetime.now()
+            })
             activity_counter += 1
         
         # Generate leads
         num_leads = random.randint(*pattern["leads"])
         for i in range(num_leads):
-            days_ago = random.randint(0, 28)
-            activity_date = start_of_month + timedelta(days=days_ago)
-            Activity.create(
-                activity_id=f"ACT{activity_counter:05d}",
-                agent_id=agent_id,
-                activity_type="lead",
-                value=0,
-                notes=f"New lead {i+1}"
-            )
+            activities_batch.append({
+                "activity_id": f"ACT{activity_counter:05d}",
+                "agent_id": agent_id,
+                "activity_type": "lead",
+                "value": 0,
+                "notes": f"Lead {i+1}",
+                "created_at": datetime.now()
+            })
             activity_counter += 1
         
         # Generate deals
         num_deals = random.randint(*pattern["deals"])
         for i in range(num_deals):
-            days_ago = random.randint(0, 28)
-            activity_date = start_of_month + timedelta(days=days_ago)
-            Activity.create(
-                activity_id=f"ACT{activity_counter:05d}",
-                agent_id=agent_id,
-                activity_type="deal",
-                value=0,
-                notes=f"Deal closed {i+1}"
-            )
+            activities_batch.append({
+                "activity_id": f"ACT{activity_counter:05d}",
+                "agent_id": agent_id,
+                "activity_type": "deal",
+                "value": 0,
+                "notes": f"Deal {i+1}",
+                "created_at": datetime.now()
+            })
             activity_counter += 1
+        
+        # Bulk insert activities for this agent
+        if activities_batch:
+            db.activities.insert_many(activities_batch)
+        activities_batch = []  # Clear batch to free memory
         
         # Generate sales based on performance
         monthly_target = agent["monthly_target"]
