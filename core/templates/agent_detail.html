@@ -1,0 +1,1364 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ agent.name }} - Agent Detail{% endblock %}
+
+{% block extra_css %}
+<style>
+    .detail-header {
+        background: #fff;
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        padding: 32px;
+        margin-bottom: 24px;
+        text-align: center;
+    }
+    
+    .detail-header h2 {
+        font-size: 24px;
+        font-weight: 600;
+        color: #212529;
+        margin-bottom: 4px;
+    }
+    
+    .detail-header p {
+        font-size: 14px;
+        color: #6c757d;
+    }
+    
+    .detail-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        margin-top: 24px;
+    }
+    
+    .detail-section {
+        background: #fff;
+        border: 1px solid #e9ecef;
+        padding: 24px;
+        border-radius: 8px;
+    }
+    
+    .detail-section h2 {
+        color: #212529;
+        margin-bottom: 16px;
+        font-size: 16px;
+        font-weight: 600;
+    }
+    
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 12px 0;
+        border-bottom: 1px solid #f1f3f5;
+    }
+    
+    .info-row:last-child {
+        border-bottom: none;
+    }
+    
+    .info-label {
+        font-weight: 500;
+        color: #6c757d;
+        font-size: 14px;
+    }
+    
+    .info-value {
+        color: #212529;
+        font-size: 14px;
+        font-weight: 500;
+    }
+    
+    .activity-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+        margin-top: 16px;
+    }
+    
+    .activity-card {
+        background: #f8f9fa;
+        border: 1px solid #e9ecef;
+        padding: 16px;
+        border-radius: 6px;
+        text-align: center;
+    }
+    
+    .activity-count {
+        font-size: 28px;
+        font-weight: 600;
+        color: #212529;
+        line-height: 1;
+    }
+    
+    .activity-label {
+        color: #6c757d;
+        margin-top: 4px;
+        font-size: 12px;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .score-bar {
+        margin: 8px 0 0 0;
+        height: 6px;
+        background: #e9ecef;
+        border-radius: 3px;
+        overflow: hidden;
+    }
+    
+    .score-fill {
+        height: 100%;
+        background: #212529;
+    }
+    
+    .back-button {
+        display: inline-block;
+        padding: 10px 20px;
+        background: #fff;
+        color: #495057;
+        text-decoration: none;
+        border: 1px solid #dee2e6;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 500;
+        transition: all 0.2s;
+        margin-top: 32px;
+    }
+    
+    .back-button:hover {
+        background: #f8f9fa;
+        border-color: #adb5bd;
+        color: #212529;
+    }
+    
+    @media (max-width: 768px) {
+        .detail-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+    
+    .funnel-section {
+        margin: 32px 0;
+        background: #fff;
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        padding: 32px;
+    }
+    
+    .funnel-section h2 {
+        font-size: 20px;
+        font-weight: 600;
+        margin-bottom: 24px;
+        color: #212529;
+    }
+    
+    .funnel-health {
+        display: inline-block;
+        padding: 8px 16px;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 14px;
+        margin-bottom: 24px;
+    }
+    
+    .funnel-health.green {
+        background: #f0fdf4;
+        color: #15803d;
+        border: 2px solid #86efac;
+    }
+    
+    .funnel-health.blue {
+        background: #eff6ff;
+        color: #1e40af;
+        border: 2px solid #93c5fd;
+    }
+    
+    .funnel-health.orange {
+        background: #fffbeb;
+        color: #d97706;
+        border: 2px solid #fbbf24;
+    }
+    
+    .funnel-health.red {
+        background: #fff5f5;
+        color: #c53030;
+        border: 2px solid #fc8181;
+    }
+    
+    .funnel-visual {
+        margin: 32px 0;
+    }
+    
+    .funnel-stage {
+        margin: 16px 0;
+        position: relative;
+    }
+    
+    .funnel-stage-bar {
+        height: 60px;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 24px;
+        color: white;
+        font-weight: 600;
+        position: relative;
+        transition: all 0.3s;
+        min-width: 200px;
+    }
+    
+    .funnel-stage-bar:hover {
+        transform: translateX(4px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    
+    .funnel-stage-label {
+        font-size: 16px;
+    }
+    
+    .funnel-stage-count {
+        font-size: 24px;
+        font-weight: 700;
+    }
+    
+    .funnel-conversion {
+        font-size: 12px;
+        color: #6c757d;
+        margin-top: 4px;
+        font-weight: 500;
+    }
+    
+    .conversion-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 16px;
+        margin: 24px 0;
+    }
+    
+    .conversion-card {
+        background: #f8f9fa;
+        border: 1px solid #e9ecef;
+        border-radius: 6px;
+        padding: 16px;
+    }
+    
+    .conversion-label {
+        font-size: 12px;
+        color: #6c757d;
+        margin-bottom: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .conversion-value {
+        font-size: 24px;
+        font-weight: 700;
+        color: #212529;
+    }
+    
+    .recommendations {
+        margin-top: 24px;
+    }
+    
+    .recommendation-card {
+        background: #fffbeb;
+        border-left: 4px solid #f59e0b;
+        padding: 16px;
+        margin-bottom: 12px;
+        border-radius: 4px;
+    }
+    
+    .recommendation-stage {
+        font-weight: 600;
+        color: #d97706;
+        margin-bottom: 4px;
+    }
+    
+    .recommendation-issue {
+        color: #92400e;
+        font-size: 14px;
+        margin-bottom: 4px;
+    }
+    
+    .recommendation-suggestion {
+        color: #78350f;
+        font-size: 13px;
+    }
+    
+    .data-section {
+        margin: 32px 0;
+        background: #fff;
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        padding: 32px;
+    }
+    
+    .data-section h2 {
+        font-size: 20px;
+        font-weight: 600;
+        margin-bottom: 16px;
+        color: #212529;
+    }
+    
+    .data-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 16px;
+    }
+    
+    .data-table thead {
+        background: #f8f9fa;
+    }
+    
+    .data-table th {
+        padding: 12px;
+        text-align: left;
+        font-weight: 600;
+        font-size: 12px;
+        color: #495057;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 2px solid #e9ecef;
+    }
+    
+    .data-table td {
+        padding: 12px;
+        font-size: 14px;
+        color: #212529;
+        border-bottom: 1px solid #e9ecef;
+    }
+    
+    .data-table tbody tr:hover {
+        background: #f8f9fa;
+    }
+    
+    .status-badge {
+        display: inline-block;
+        padding: 4px 10px;
+        border-radius: 4px;
+        font-weight: 500;
+        font-size: 11px;
+        text-transform: uppercase;
+    }
+    
+    .status-new { background: #eff6ff; color: #1e40af; border: 1px solid #93c5fd; }
+    .status-contacted { background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; }
+    .status-qualified { background: #dbeafe; color: #1e3a8a; border: 1px solid #93c5fd; }
+    .status-proposal { background: #e0e7ff; color: #3730a3; border: 1px solid #a5b4fc; }
+    .status-negotiation { background: #fef3c7; color: #78350f; border: 1px solid #fcd34d; }
+    .status-won { background: #f0fdf4; color: #15803d; border: 1px solid #86efac; }
+    .status-lost { background: #fff5f5; color: #c53030; border: 1px solid #fc8181; }
+    
+    .product-category {
+        font-size: 11px;
+        color: #6c757d;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .lead-summary {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 12px;
+        margin-bottom: 24px;
+    }
+    
+    .lead-summary-card {
+        background: #f8f9fa;
+        padding: 12px;
+        border-radius: 6px;
+        text-align: center;
+        border: 1px solid #e9ecef;
+    }
+    
+    .lead-summary-count {
+        font-size: 24px;
+        font-weight: 700;
+        color: #212529;
+    }
+    
+    .lead-summary-label {
+        font-size: 11px;
+        color: #6c757d;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-top: 4px;
+    }
+    
+    .funnel-stage-analysis {
+        margin: 24px 0;
+    }
+    
+    .stage-card {
+        background: #fff;
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 16px;
+        transition: all 0.2s;
+    }
+    
+    .stage-card:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+    
+    .stage-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+        padding-bottom: 12px;
+        border-bottom: 2px solid #e9ecef;
+    }
+    
+    .stage-card-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: #212529;
+    }
+    
+    .stage-status {
+        display: inline-block;
+        padding: 6px 14px;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .stage-status.green { background: #f0fdf4; color: #15803d; border: 2px solid #86efac; }
+    .stage-status.blue { background: #eff6ff; color: #1e40af; border: 2px solid #93c5fd; }
+    .stage-status.orange { background: #fffbeb; color: #d97706; border: 2px solid #fbbf24; }
+    .stage-status.red { background: #fff5f5; color: #c53030; border: 2px solid #fc8181; }
+    
+    .stage-metrics {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+        margin-bottom: 16px;
+    }
+    
+    .stage-metric {
+        text-align: center;
+    }
+    
+    .stage-metric-value {
+        font-size: 28px;
+        font-weight: 700;
+        color: #212529;
+    }
+    
+    .stage-metric-label {
+        font-size: 11px;
+        color: #6c757d;
+        text-transform: uppercase;
+        margin-top: 4px;
+    }
+    
+    .stage-insight {
+        background: #f8f9fa;
+        border-left: 4px solid #667eea;
+        padding: 12px 16px;
+        margin-top: 12px;
+        border-radius: 4px;
+    }
+    
+    .stage-insight.warning {
+        background: #fff5f5;
+        border-left-color: #f59e0b;
+    }
+    
+    .stage-insight.success {
+        background: #f0fdf4;
+        border-left-color: #15803d;
+    }
+    
+    .insight-title {
+        font-weight: 600;
+        font-size: 14px;
+        margin-bottom: 4px;
+    }
+    
+    .insight-message {
+        font-size: 13px;
+        color: #6c757d;
+        margin-bottom: 4px;
+    }
+    
+    .insight-action {
+        font-size: 13px;
+        color: #495057;
+        font-weight: 500;
+    }
+    
+    .ai-recommendations-section {
+        margin-top: 24px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 8px;
+        padding: 24px;
+        color: white;
+    }
+    
+    .ai-recommendations-section h3 {
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 16px;
+    }
+    
+    .priority-badge {
+        display: inline-block;
+        padding: 4px 10px;
+        border-radius: 4px;
+        font-weight: 600;
+        font-size: 11px;
+        margin-right: 8px;
+    }
+    
+    .priority-HIGH { background: #fee2e2; color: #991b1b; }
+    .priority-MEDIUM { background: #fef3c7; color: #92400e; }
+    .priority-LOW { background: #dbeafe; color: #1e3a8a; }
+    
+    .funnel-score-card {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+        padding: 24px;
+        border-radius: 8px;
+        text-align: center;
+        margin-bottom: 24px;
+    }
+    
+    .funnel-score-value {
+        font-size: 48px;
+        font-weight: 700;
+    }
+    
+    .funnel-score-label {
+        font-size: 14px;
+        opacity: 0.9;
+        margin-top: 8px;
+    }
+    
+    .ai-prediction-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 24px;
+        border-radius: 8px;
+        margin-top: 24px;
+    }
+    
+    .prediction-result {
+        text-align: center;
+        padding: 20px;
+        background: rgba(255,255,255,0.1);
+        border-radius: 8px;
+        margin-bottom: 16px;
+    }
+    
+    .prediction-label {
+        font-size: 14px;
+        opacity: 0.9;
+        margin-bottom: 8px;
+    }
+    
+    .prediction-value {
+        font-size: 36px;
+        font-weight: 700;
+    }
+    
+    .prediction-HIT {
+        color: #86efac;
+    }
+    
+    .prediction-MISS {
+        color: #fca5a5;
+    }
+    
+    .ai-chat-widget {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        z-index: 1000;
+    }
+    
+    .chat-toggle {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        font-size: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s;
+    }
+    
+    .chat-toggle:hover {
+        transform: scale(1.1);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+    }
+    
+    .chat-window {
+        display: none;
+        position: fixed;
+        bottom: 100px;
+        right: 24px;
+        width: 380px;
+        height: 500px;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        flex-direction: column;
+        overflow: hidden;
+    }
+    
+    .chat-window.active {
+        display: flex;
+    }
+    
+    .chat-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 16px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .chat-header h3 {
+        font-size: 16px;
+        font-weight: 600;
+        margin: 0;
+    }
+    
+    .chat-close {
+        background: none;
+        border: none;
+        color: white;
+        font-size: 20px;
+        cursor: pointer;
+        padding: 0;
+        width: 24px;
+        height: 24px;
+    }
+    
+    .chat-messages {
+        flex: 1;
+        padding: 20px;
+        overflow-y: auto;
+        background: #f8f9fa;
+    }
+    
+    .chat-message {
+        margin-bottom: 16px;
+        animation: fadeIn 0.3s;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .message-bubble {
+        padding: 12px 16px;
+        border-radius: 12px;
+        max-width: 80%;
+        word-wrap: break-word;
+    }
+    
+    .message-user {
+        text-align: right;
+    }
+    
+    .message-user .message-bubble {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        margin-left: auto;
+    }
+    
+    .message-ai .message-bubble {
+        background: white;
+        color: #212529;
+        border: 1px solid #e9ecef;
+    }
+    
+    .message-time {
+        font-size: 11px;
+        color: #6c757d;
+        margin-top: 4px;
+    }
+    
+    .quick-questions {
+        padding: 12px 20px;
+        background: #f8f9fa;
+        border-top: 1px solid #e9ecef;
+    }
+    
+    .quick-questions-label {
+        font-size: 12px;
+        color: #6c757d;
+        margin-bottom: 8px;
+        font-weight: 500;
+    }
+    
+    .quick-question-btn {
+        display: inline-block;
+        padding: 6px 12px;
+        background: white;
+        border: 1px solid #e9ecef;
+        border-radius: 16px;
+        font-size: 12px;
+        margin: 4px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    
+    .quick-question-btn:hover {
+        background: #667eea;
+        color: white;
+        border-color: #667eea;
+    }
+    
+    .chat-input-area {
+        padding: 16px 20px;
+        background: white;
+        border-top: 1px solid #e9ecef;
+        display: flex;
+        gap: 8px;
+    }
+    
+    .chat-input {
+        flex: 1;
+        padding: 10px 16px;
+        border: 1px solid #e9ecef;
+        border-radius: 20px;
+        font-size: 14px;
+        outline: none;
+    }
+    
+    .chat-input:focus {
+        border-color: #667eea;
+    }
+    
+    .chat-send {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        cursor: pointer;
+        font-size: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .chat-send:hover {
+        opacity: 0.9;
+    }
+    
+    .typing-indicator {
+        display: flex;
+        gap: 4px;
+        padding: 12px 16px;
+    }
+    
+    .typing-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #6c757d;
+        animation: typing 1.4s infinite;
+    }
+    
+    .typing-dot:nth-child(2) {
+        animation-delay: 0.2s;
+    }
+    
+    .typing-dot:nth-child(3) {
+        animation-delay: 0.4s;
+    }
+    
+    @keyframes typing {
+        0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+        30% { transform: translateY(-10px); opacity: 1; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+{% if error %}
+    <div class="alert alert-error">{{ error }}</div>
+{% else %}
+    <div class="detail-header">
+        <h2>{{ agent.name }}</h2>
+        <p>{{ agent.email }}</p>
+    </div>
+    
+    <div class="detail-grid">
+        <div class="detail-section">
+            <h2>Performance Metrics</h2>
+            {% if performance %}
+                <div class="info-row">
+                    <span class="info-label">Overall Score:</span>
+                    <span class="info-value">{{ performance.overall_score }}%</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Performance Level:</span>
+                    <span class="info-value">{{ performance.performance_level }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Month:</span>
+                    <span class="info-value">{{ performance.month }}</span>
+                </div>
+                
+                <div class="activity-grid">
+                    <div class="activity-card">
+                        <div class="activity-count">{{ performance.activities.calls.count }}</div>
+                        <div class="activity-label">Calls</div>
+                        <div class="score-bar">
+                            <div class="score-fill" style="width: {{ performance.activities.calls.score }}%"></div>
+                        </div>
+                    </div>
+                    <div class="activity-card">
+                        <div class="activity-count">{{ performance.activities.meetings.count }}</div>
+                        <div class="activity-label">Meetings</div>
+                        <div class="score-bar">
+                            <div class="score-fill" style="width: {{ performance.activities.meetings.score }}%"></div>
+                        </div>
+                    </div>
+                    <div class="activity-card">
+                        <div class="activity-count">{{ performance.activities.leads.count }}</div>
+                        <div class="activity-label">Leads</div>
+                        <div class="score-bar">
+                            <div class="score-fill" style="width: {{ performance.activities.leads.score }}%"></div>
+                        </div>
+                    </div>
+                    <div class="activity-card">
+                        <div class="activity-count">{{ performance.activities.deals.count }}</div>
+                        <div class="activity-label">Deals</div>
+                        <div class="score-bar">
+                            <div class="score-fill" style="width: {{ performance.activities.deals.score }}%"></div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+        
+        <div class="detail-section">
+            <h2>Sales Information</h2>
+            {% if performance %}
+                <div class="info-row">
+                    <span class="info-label">Target:</span>
+                    <span class="info-value">₱{{ performance.sales.target|floatformat:0 }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Actual:</span>
+                    <span class="info-value">₱{{ performance.sales.actual|floatformat:0 }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Achievement:</span>
+                    <span class="info-value">{{ performance.sales.percentage|floatformat:1 }}%</span>
+                </div>
+            {% endif %}
+            
+            {% if prediction %}
+            <div class="ai-prediction-card">
+                <h2 style="margin: 0 0 16px 0; font-size: 18px;">🤖 AI Target Prediction</h2>
+                <div class="prediction-result">
+                    <div class="prediction-label">Will {{ agent.name }} hit the target?</div>
+                    <div class="prediction-value prediction-{{ prediction.prediction }}">
+                        {{ prediction.prediction }}
+                    </div>
+                    <div style="margin-top: 12px; font-size: 14px; opacity: 0.9;">
+                        Confidence: {{ prediction.confidence|floatformat:1 }}%
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div style="background: rgba(255,255,255,0.1); padding: 16px; border-radius: 8px; text-align: center;">
+                        <div style="font-size: 24px; font-weight: 700;">{{ prediction.risk_level }}</div>
+                        <div style="font-size: 13px; opacity: 0.9; margin-top: 4px;">Risk Level</div>
+                    </div>
+                    {% if prediction.funnel_score %}
+                    <div style="background: rgba(255,255,255,0.1); padding: 16px; border-radius: 8px; text-align: center;">
+                        <div style="font-size: 24px; font-weight: 700;">{{ prediction.funnel_score }}/100</div>
+                        <div style="font-size: 13px; opacity: 0.9; margin-top: 4px;">Funnel Score</div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% else %}
+                <p style="color: #6c757d; text-align: center; padding: 16px; font-size: 14px;">
+                    No prediction available. Train the AI model first.
+                </p>
+            {% endif %}
+        </div>
+    </div>
+    
+    {% if funnel %}
+    <div class="funnel-section">
+        <h2>AI-Powered Sales Funnel Analysis</h2>
+        
+        {% if prediction.funnel_score %}
+        <div class="funnel-score-card">
+            <div class="funnel-score-value">{{ prediction.funnel_score }}</div>
+            <div class="funnel-score-label">Overall Funnel Score (out of 100)</div>
+        </div>
+        {% endif %}
+        
+        <div>
+            <span class="funnel-health {{ funnel.health_color }}">
+                Funnel Health: {{ funnel.funnel_health }}
+            </span>
+            <span style="margin-left: 16px; color: #6c757d; font-size: 14px;">
+                Overall Conversion: {{ funnel.conversion_rates.overall|floatformat:1 }}%
+            </span>
+        </div>
+        
+        <div class="conversion-grid">
+            <div class="conversion-card">
+                <div class="conversion-label">Calls → Leads</div>
+                <div class="conversion-value">{{ funnel.conversion_rates.calls_to_leads|floatformat:1 }}%</div>
+            </div>
+            <div class="conversion-card">
+                <div class="conversion-label">Leads → Meetings</div>
+                <div class="conversion-value">{{ funnel.conversion_rates.leads_to_meetings|floatformat:1 }}%</div>
+            </div>
+            <div class="conversion-card">
+                <div class="conversion-label">Meetings → Deals</div>
+                <div class="conversion-value">{{ funnel.conversion_rates.meetings_to_deals|floatformat:1 }}%</div>
+            </div>
+            <div class="conversion-card">
+                <div class="conversion-label">Deals → Sales</div>
+                <div class="conversion-value">{{ funnel.conversion_rates.deals_to_sales|floatformat:1 }}%</div>
+            </div>
+        </div>
+        
+        <div class="funnel-visual">
+            <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 16px;">Funnel Stages</h3>
+            {% for stage in funnel.stages %}
+            <div class="funnel-stage">
+                <div class="funnel-stage-bar" style="width: {{ stage.percentage }}%; background: {{ stage.color }};">
+                    <span class="funnel-stage-label">{{ stage.label }}</span>
+                    <span class="funnel-stage-count">{{ stage.count }}</span>
+                </div>
+                {% if stage.conversion_from_previous %}
+                <div class="funnel-conversion">
+                    {{ stage.conversion_from_previous|floatformat:1 }}% conversion from previous stage
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        
+        {% if prediction.funnel_analysis.stages_analysis %}
+        <div class="funnel-stage-analysis">
+            <h3 style="font-size: 18px; font-weight: 600; margin-bottom: 16px;">Stage-by-Stage Analysis</h3>
+            
+            {% for stage in prediction.funnel_analysis.stages_analysis %}
+            <div class="stage-card">
+                <div class="stage-card-header">
+                    <div class="stage-card-title">{{ stage.name }}</div>
+                    <span class="stage-status {{ stage.status_color }}">{{ stage.status }}</span>
+                </div>
+                
+                <div class="stage-metrics">
+                    <div class="stage-metric">
+                        <div class="stage-metric-value">{{ stage.conversion|floatformat:1 }}%</div>
+                        <div class="stage-metric-label">Current</div>
+                    </div>
+                    <div class="stage-metric">
+                        <div class="stage-metric-value">{{ stage.benchmark|floatformat:0 }}%</div>
+                        <div class="stage-metric-label">Benchmark</div>
+                    </div>
+                    <div class="stage-metric">
+                        <div class="stage-metric-value">{{ stage.performance_percentage|floatformat:0 }}%</div>
+                        <div class="stage-metric-label">vs Target</div>
+                    </div>
+                </div>
+                
+                <div style="font-size: 13px; color: #6c757d; margin-bottom: 8px;">
+                    {{ stage.from_count }} → {{ stage.to_count }} conversions
+                    {% if stage.potential_improvement > 0 %}
+                    (Potential: +{{ stage.potential_improvement }} more)
+                    {% endif %}
+                </div>
+                
+                {% for insight in stage.insights %}
+                <div class="stage-insight {{ insight.type }}">
+                    <div class="insight-title">{{ insight.title }}</div>
+                    <div class="insight-message">{{ insight.message }}</div>
+                    <div class="insight-action">💡 Action: {{ insight.action }}</div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        {% if prediction.ai_recommendations %}
+        <div class="ai-recommendations-section">
+            <h3>🤖 AI Priority Recommendations</h3>
+            {% for rec in prediction.ai_recommendations %}
+            <div style="background: rgba(255,255,255,0.1); padding: 16px; border-radius: 6px; margin-bottom: 12px;">
+                <div style="margin-bottom: 8px;">
+                    <span class="priority-badge priority-{{ rec.priority }}">{{ rec.priority }} PRIORITY</span>
+                    <strong>{{ rec.stage }}</strong>
+                </div>
+                <div style="font-size: 14px; opacity: 0.9; margin-bottom: 4px;">
+                    Issue: {{ rec.issue }}
+                </div>
+                <div style="font-size: 14px; font-weight: 500;">
+                    ✓ Action: {{ rec.action }}
+                </div>
+                <div style="font-size: 13px; opacity: 0.8; margin-top: 4px;">
+                    Impact: {{ rec.potential_impact }}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+    
+    {% if sales %}
+    <div class="data-section">
+        <h2>Recent Sales (Last 10)</h2>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Customer</th>
+                    <th>Product</th>
+                    <th>Category</th>
+                    <th style="text-align: right;">Amount</th>
+                    <th>Notes</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for sale in sales %}
+                <tr>
+                    <td>{{ sale.date|date:"M d, Y" }}</td>
+                    <td>{{ sale.customer }}</td>
+                    <td>
+                        {% if sale.product %}
+                            {{ sale.product.name }}
+                        {% else %}
+                            <span style="color: #6c757d;">No product</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if sale.product %}
+                            <span class="product-category">{{ sale.product.category }}</span>
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                    <td style="text-align: right; font-weight: 600;">₱{{ sale.amount|floatformat:0 }}</td>
+                    <td style="font-size: 13px; color: #6c757d;">{{ sale.notes }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+    
+    {% if leads %}
+    <div class="data-section">
+        <h2>Active Leads Pipeline</h2>
+        
+        <div class="lead-summary">
+            <div class="lead-summary-card">
+                <div class="lead-summary-count">{{ lead_status_counts.total }}</div>
+                <div class="lead-summary-label">Total</div>
+            </div>
+            <div class="lead-summary-card">
+                <div class="lead-summary-count">{{ lead_status_counts.new }}</div>
+                <div class="lead-summary-label">New</div>
+            </div>
+            <div class="lead-summary-card">
+                <div class="lead-summary-count">{{ lead_status_counts.contacted }}</div>
+                <div class="lead-summary-label">Contacted</div>
+            </div>
+            <div class="lead-summary-card">
+                <div class="lead-summary-count">{{ lead_status_counts.qualified }}</div>
+                <div class="lead-summary-label">Qualified</div>
+            </div>
+            <div class="lead-summary-card">
+                <div class="lead-summary-count">{{ lead_status_counts.proposal }}</div>
+                <div class="lead-summary-label">Proposal</div>
+            </div>
+            <div class="lead-summary-card">
+                <div class="lead-summary-count">{{ lead_status_counts.negotiation }}</div>
+                <div class="lead-summary-label">Negotiation</div>
+            </div>
+            <div class="lead-summary-card">
+                <div class="lead-summary-count">{{ lead_status_counts.won }}</div>
+                <div class="lead-summary-label">Won</div>
+            </div>
+            <div class="lead-summary-card">
+                <div class="lead-summary-count">{{ lead_status_counts.lost }}</div>
+                <div class="lead-summary-label">Lost</div>
+            </div>
+        </div>
+        
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Customer</th>
+                    <th>Contact</th>
+                    <th>Product</th>
+                    <th>Category</th>
+                    <th>Status</th>
+                    <th style="text-align: right;">Potential Value</th>
+                    <th>Notes</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for lead in leads %}
+                <tr>
+                    <td style="font-weight: 600;">{{ lead.customer_name }}</td>
+                    <td style="font-size: 13px;">{{ lead.contact }}</td>
+                    <td>
+                        {% if lead.product %}
+                            {{ lead.product.name }}
+                        {% else %}
+                            <span style="color: #6c757d;">No product</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if lead.product %}
+                            <span class="product-category">{{ lead.product.category }}</span>
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                    <td>
+                        <span class="status-badge status-{{ lead.status|lower }}">{{ lead.status }}</span>
+                    </td>
+                    <td style="text-align: right; font-weight: 600;">₱{{ lead.value|floatformat:0 }}</td>
+                    <td style="font-size: 13px; color: #6c757d;">{{ lead.notes }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+    
+    <div style="text-align: center;">
+        <a href="/" class="back-button">← Back to Dashboard</a>
+    </div>
+    
+    <!-- AI Chat Widget -->
+    <div class="ai-chat-widget">
+        <button class="chat-toggle" onclick="toggleChat()">💬</button>
+        <div class="chat-window" id="chatWindow">
+            <div class="chat-header">
+                <h3>🤖 AI Assistant</h3>
+                <button class="chat-close" onclick="toggleChat()">×</button>
+            </div>
+            <div class="chat-messages" id="chatMessages">
+                <div class="chat-message message-ai">
+                    <div class="message-bubble">
+                        Hi {{ agent.name }}! 👋 I'm your AI assistant. I can help you understand your performance, funnel analysis, and provide recommendations. What would you like to know?
+                    </div>
+                </div>
+            </div>
+            <div class="quick-questions">
+                <div class="quick-questions-label">Quick Questions:</div>
+                <button class="quick-question-btn" onclick="askQuestion('How am I performing?')">How am I performing?</button>
+                <button class="quick-question-btn" onclick="askQuestion('What should I focus on?')">What should I focus on?</button>
+                <button class="quick-question-btn" onclick="askQuestion('Explain my funnel')">Explain my funnel</button>
+                <button class="quick-question-btn" onclick="askQuestion('My top leads')">My top leads</button>
+            </div>
+            <div class="chat-input-area">
+                <input type="text" class="chat-input" id="chatInput" placeholder="Ask me anything..." onkeypress="handleKeyPress(event)">
+                <button class="chat-send" onclick="sendMessage()">→</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const agentData = {
+            name: '{{ agent.name }}',
+            email: '{{ agent.email }}',
+            {% if performance %}
+            performance: {
+                overall_score: {{ performance.overall_score }},
+                level: '{{ performance.performance_level }}',
+                calls: {{ performance.activities.calls.count }},
+                meetings: {{ performance.activities.meetings.count }},
+                leads: {{ performance.activities.leads.count }},
+                deals: {{ performance.activities.deals.count }},
+                sales: {
+                    actual: {{ performance.sales.actual }},
+                    target: {{ performance.sales.target }},
+                    percentage: {{ performance.sales.percentage }}
+                }
+            },
+            {% endif %}
+            {% if prediction %}
+            prediction: {
+                result: '{{ prediction.prediction }}',
+                risk: '{{ prediction.risk_level }}',
+                confidence: {{ prediction.confidence }},
+                {% if prediction.funnel_score %}
+                funnelScore: {{ prediction.funnel_score }}
+                {% endif %}
+            },
+            {% endif %}
+            {% if funnel %}
+            funnel: {
+                calls: {{ funnel.counts.calls }},
+                leads: {{ funnel.counts.leads }},
+                meetings: {{ funnel.counts.meetings }},
+                deals: {{ funnel.counts.deals }},
+                sales: {{ funnel.counts.closed_sales }},
+                health: '{{ funnel.funnel_health }}'
+            },
+            {% endif %}
+            {% if lead_status_counts %}
+            leads: {
+                total: {{ lead_status_counts.total }},
+                new: {{ lead_status_counts.new }},
+                qualified: {{ lead_status_counts.qualified }},
+                won: {{ lead_status_counts.won }}
+            }
+            {% endif %}
+        };
+        
+        function toggleChat() {
+            const chatWindow = document.getElementById('chatWindow');
+            chatWindow.classList.toggle('active');
+        }
+        
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+        
+        function askQuestion(question) {
+            document.getElementById('chatInput').value = question;
+            sendMessage();
+        }
+        
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            if (!message) return;
+            
+            // Add user message
+            addMessage(message, 'user');
+            input.value = '';
+            
+            // Show typing indicator
+            showTyping();
+            
+            // Generate AI response
+            setTimeout(() => {
+                hideTyping();
+                const response = generateResponse(message);
+                addMessage(response, 'ai');
+            }, 1000);
+        }
+        
+        function addMessage(text, type) {
+            const messagesDiv = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `chat-message message-${type}`;
+            messageDiv.innerHTML = `
+                <div class="message-bubble">${text}</div>
+            `;
+            messagesDiv.appendChild(messageDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+        
+        function showTyping() {
+            const messagesDiv = document.getElementById('chatMessages');
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'chat-message message-ai';
+            typingDiv.id = 'typingIndicator';
+            typingDiv.innerHTML = `
+                <div class="typing-indicator">
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                </div>
+            `;
+            messagesDiv.appendChild(typingDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+        
+        function hideTyping() {
+            const typing = document.getElementById('typingIndicator');
+            if (typing) typing.remove();
+        }
+        
+        function generateResponse(question) {
+            const q = question.toLowerCase();
+            
+            // Performance questions
+            if (q.includes('perform') || q.includes('doing')) {
+                if (!agentData.performance) return "I don't have performance data available yet.";
+                const perf = agentData.performance;
+                return `You're doing ${perf.level.toLowerCase()}! Your overall score is ${perf.overall_score}%. You've made ${perf.calls} calls, generated ${perf.leads} leads, held ${perf.meetings} meetings, and closed ${perf.deals} deals. Your sales achievement is ${perf.sales.percentage.toFixed(1)}% of target (₱${Math.round(perf.sales.actual).toLocaleString()} out of ₱${Math.round(perf.sales.target).toLocaleString()}).`;
+            }
+            
+            // Focus/recommendations
+            if (q.includes('focus') || q.includes('improve') || q.includes('recommend')) {
+                if (!agentData.prediction) return "Train the AI model first to get recommendations.";
+                let response = `Based on AI analysis, you should focus on `;
+                if (agentData.prediction.risk === 'HIGH') {
+                    response += `urgent improvements. Your risk level is HIGH with ${agentData.prediction.confidence.toFixed(1)}% confidence. `;
+                } else if (agentData.prediction.risk === 'MEDIUM') {
+                    response += `steady improvement. Your risk level is MEDIUM. `;
+                } else {
+                    response += `maintaining your current excellent performance! `;
+                }
+                if (agentData.funnel) {
+                    response += `Your funnel health is ${agentData.funnel.health}. `;
+                }
+                return response + `Check the stage-by-stage analysis below for specific recommendations.`;
+            }
+            
+            // Funnel explanation
+            if (q.includes('funnel')) {
+                if (!agentData.funnel) return "Funnel data is being generated.";
+                const f = agentData.funnel;
+                return `Your sales funnel shows: ${f.calls} calls → ${f.leads} leads (${((f.leads/f.calls)*100).toFixed(1)}%) → ${f.meetings} meetings → ${f.deals} deals → ${f.sales} closed sales. Overall funnel health: ${f.health}. The funnel analysis below shows where you can improve!`;
+            }
+            
+            // Leads
+            if (q.includes('lead')) {
+                if (!agentData.leads) return "Lead data is loading.";
+                const l = agentData.leads;
+                return `You have ${l.total} total leads: ${l.new} new, ${l.qualified} qualified, and ${l.won} won! Focus on converting your ${l.new + l.qualified} active leads into wins. Check the leads table below for details.`;
+            }
+            
+            // Prediction
+            if (q.includes('predict') || q.includes('target') || q.includes('hit')) {
+                if (!agentData.prediction) return "AI prediction is generating...";
+                const pred = agentData.prediction;
+                return `The AI predicts you will ${pred.result} your target with ${pred.confidence.toFixed(1)}% confidence. Risk level: ${pred.risk}. ${pred.result === 'HIT' ? '🎉 Keep up the great work!' : '💪 You can still turn this around - check the recommendations below!'}`;
+            }
+            
+            // Default response
+            return `I can help you with:<br>
+            • Your performance metrics and scores<br>
+            • AI predictions and recommendations<br>
+            • Sales funnel analysis<br>
+            • Lead pipeline status<br>
+            <br>Try asking: "How am I performing?" or "What should I focus on?"`;
+        }
+    </script>
+{% endif %}
+{% endblock %}

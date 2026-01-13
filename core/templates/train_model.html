@@ -1,0 +1,187 @@
+{% extends 'base.html' %}
+
+{% block title %}Train AI Model{% endblock %}
+
+{% block extra_css %}
+<style>
+    .train-container {
+        max-width: 600px;
+        margin: 0 auto;
+    }
+    
+    .train-box {
+        background: #fff;
+        border: 1px solid #e9ecef;
+        padding: 48px;
+        border-radius: 8px;
+        text-align: center;
+    }
+    
+    .train-box h2 {
+        font-size: 20px;
+        font-weight: 600;
+        color: #212529;
+        margin-bottom: 12px;
+    }
+    
+    .train-box p {
+        font-size: 14px;
+        color: #6c757d;
+        line-height: 1.6;
+        margin-bottom: 32px;
+    }
+    
+    .train-btn {
+        padding: 12px 32px;
+        background: #212529;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    
+    .train-btn:hover {
+        background: #495057;
+    }
+    
+    .train-btn:disabled {
+        background: #adb5bd;
+        cursor: not-allowed;
+        opacity: 0.6;
+    }
+    
+    #result {
+        margin-top: 24px;
+    }
+    
+    .loader {
+        border: 3px solid #e9ecef;
+        border-top: 3px solid #212529;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 0.8s linear infinite;
+        margin: 16px auto;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    .info-box {
+        background: #f8f9fa;
+        border: 1px solid #e9ecef;
+        padding: 20px;
+        border-radius: 6px;
+        margin-top: 24px;
+        text-align: left;
+    }
+    
+    .info-box strong {
+        color: #212529;
+        font-size: 14px;
+        font-weight: 600;
+    }
+    
+    .info-box p {
+        color: #6c757d;
+        font-size: 13px;
+        margin: 8px 0 0 0;
+        line-height: 1.5;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="train-container">
+    <div class="train-box">
+        <h2>Train AI Model</h2>
+        <p>
+            Train the machine learning model to predict which agents will hit or miss their targets.
+            The system uses a RandomForest classifier with historical performance data.
+        </p>
+        
+        <button id="trainBtn" class="train-btn" onclick="trainModel()">
+            Start Training
+        </button>
+        
+        <div id="result"></div>
+    </div>
+    
+    <div class="info-box">
+        <strong>Note</strong>
+        <p>This generates synthetic training data for demonstration. In production, connect real historical sales data for accurate predictions.</p>
+    </div>
+</div>
+
+<script>
+    function trainModel() {
+        const btn = document.getElementById('trainBtn');
+        const result = document.getElementById('result');
+        
+        btn.disabled = true;
+        btn.textContent = 'Training...';
+        
+        result.innerHTML = '<div class="loader"></div><p style="font-size: 14px; color: #6c757d; margin-top: 12px;">Training model, please wait...</p>';
+        
+        fetch('/train/', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken')
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                result.innerHTML = `
+                    <div class="alert alert-success">
+                        <strong>${data.message}</strong>
+                        <p style="margin-top: 8px;">Model Accuracy: ${(data.accuracy * 100).toFixed(2)}%</p>
+                        <a href="/" style="display: inline-block; margin-top: 16px; padding: 10px 20px; background: #212529; color: white; text-decoration: none; border-radius: 6px; font-size: 14px; font-weight: 500;">
+                            View Dashboard
+                        </a>
+                    </div>
+                `;
+            } else {
+                result.innerHTML = `
+                    <div class="alert alert-error">
+                        <strong>Training Failed</strong>
+                        <p style="margin-top: 8px;">${data.error}</p>
+                    </div>
+                `;
+            }
+            btn.disabled = false;
+            btn.textContent = 'Train Again';
+        })
+        .catch(error => {
+            result.innerHTML = `
+                <div class="alert alert-error">
+                    <strong>Error</strong>
+                    <p style="margin-top: 8px;">${error.message}</p>
+                </div>
+            `;
+            btn.disabled = false;
+            btn.textContent = 'Try Again';
+        });
+    }
+    
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+</script>
+{% endblock %}

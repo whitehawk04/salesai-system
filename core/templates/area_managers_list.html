@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block title %}Area Managers{% endblock %}
+
+{% block content %}
+<h1 style="font-size: 28px; font-weight: 600; margin-bottom: 24px;">Area Managers</h1>
+
+{% if error %}
+    <div class="alert alert-error">{{ error }}</div>
+{% endif %}
+
+{% if managers %}
+<div style="display: grid; gap: 16px;">
+    {% for manager in managers %}
+    <a href="{% url 'area_manager_dashboard' manager.manager_id %}" style="text-decoration: none; color: inherit;">
+        <div style="background: #fff; border: 1px solid #e9ecef; border-radius: 8px; padding: 24px; transition: all 0.2s;">
+            <h3 style="font-size: 18px; font-weight: 600; margin-bottom: 8px;">{{ manager.name }}</h3>
+            <p style="color: #6c757d; font-size: 14px;">{{ manager.area_name }} • {{ manager.email }}</p>
+        </div>
+    </a>
+    {% endfor %}
+</div>
+{% else %}
+<div style="text-align: center; padding: 64px 32px;">
+    <p style="color: #6c757d;">No area managers found</p>
+</div>
+{% endif %}
+{% endblock %}

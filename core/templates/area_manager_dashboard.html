@@ -1,0 +1,534 @@
+{% extends 'base.html' %}
+
+{% block title %}Area Manager Dashboard - {{ manager.name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .manager-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 40px;
+        border-radius: 12px;
+        color: white;
+        margin-bottom: 32px;
+    }
+    
+    .manager-header h1 {
+        font-size: 32px;
+        margin-bottom: 8px;
+    }
+    
+    .manager-header p {
+        opacity: 0.9;
+        font-size: 16px;
+    }
+    
+    .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 16px;
+        margin-bottom: 32px;
+    }
+    
+    .summary-card {
+        background: #fff;
+        border: 1px solid #e9ecef;
+        padding: 24px;
+        border-radius: 8px;
+    }
+    
+    .summary-card h3 {
+        font-size: 28px;
+        font-weight: 600;
+        margin-bottom: 4px;
+        color: #212529;
+    }
+    
+    .summary-card p {
+        font-size: 14px;
+        color: #6c757d;
+        font-weight: 500;
+    }
+    
+    .summary-card.highlight {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+    }
+    
+    .summary-card.highlight h3,
+    .summary-card.highlight p {
+        color: white;
+    }
+    
+    .risk-summary {
+        display: flex;
+        gap: 16px;
+        align-items: center;
+    }
+    
+    .risk-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .risk-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+    }
+    
+    .risk-dot.high { background: #c53030; }
+    .risk-dot.medium { background: #d97706; }
+    .risk-dot.low { background: #15803d; }
+    
+    .agents-section {
+        margin-top: 32px;
+    }
+    
+    .agents-section h2 {
+        font-size: 20px;
+        font-weight: 600;
+        margin-bottom: 16px;
+        color: #212529;
+    }
+    
+    .agents-grid {
+        display: grid;
+        gap: 16px;
+    }
+    
+    .agent-card {
+        background: #fff;
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        padding: 24px;
+        transition: all 0.2s;
+    }
+    
+    .agent-card:hover {
+        border-color: #dee2e6;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+    
+    .agent-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 24px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid #e9ecef;
+    }
+    
+    .agent-name {
+        font-size: 18px;
+        font-weight: 600;
+        color: #212529;
+        margin-bottom: 4px;
+    }
+    
+    .agent-id {
+        font-size: 13px;
+        color: #6c757d;
+        font-weight: 400;
+    }
+    
+    .risk-badge {
+        padding: 4px 12px;
+        border-radius: 4px;
+        font-weight: 500;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .risk-HIGH {
+        background: #fff5f5;
+        color: #c53030;
+        border: 1px solid #fc8181;
+    }
+    
+    .risk-MEDIUM {
+        background: #fffbeb;
+        color: #d97706;
+        border: 1px solid #fbbf24;
+    }
+    
+    .risk-LOW {
+        background: #f0fdf4;
+        color: #15803d;
+        border: 1px solid #86efac;
+    }
+    
+    .metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+        margin: 16px 0;
+    }
+    
+    .metric {
+        text-align: center;
+        padding: 16px 12px;
+        background: #f8f9fa;
+        border-radius: 6px;
+        border: 1px solid #e9ecef;
+    }
+    
+    .metric-value {
+        font-size: 24px;
+        font-weight: 600;
+        color: #212529;
+        line-height: 1;
+    }
+    
+    .metric-label {
+        font-size: 12px;
+        color: #6c757d;
+        margin-top: 4px;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .progress-bar {
+        width: 100%;
+        height: 8px;
+        background: #e9ecef;
+        border-radius: 4px;
+        overflow: hidden;
+        margin: 8px 0;
+    }
+    
+    .progress-fill {
+        height: 100%;
+        background: #667eea;
+        transition: width 0.3s ease;
+    }
+    
+    .progress-label {
+        font-size: 13px;
+        color: #495057;
+        margin-top: 4px;
+        font-weight: 500;
+    }
+    
+    .table-section {
+        margin: 32px 0;
+    }
+    
+    .table-section h2 {
+        font-size: 20px;
+        font-weight: 600;
+        margin-bottom: 16px;
+        color: #212529;
+    }
+    
+    .performance-table {
+        width: 100%;
+        background: #fff;
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    
+    .performance-table table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    .performance-table thead {
+        background: #f8f9fa;
+    }
+    
+    .performance-table th {
+        padding: 16px;
+        text-align: left;
+        font-weight: 600;
+        font-size: 13px;
+        color: #495057;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 2px solid #e9ecef;
+    }
+    
+    .performance-table th.text-right {
+        text-align: right;
+    }
+    
+    .performance-table th.text-center {
+        text-align: center;
+    }
+    
+    .performance-table tbody tr {
+        border-bottom: 1px solid #e9ecef;
+        transition: background 0.2s;
+    }
+    
+    .performance-table tbody tr:hover {
+        background: #f8f9fa;
+    }
+    
+    .performance-table tbody tr:last-child {
+        border-bottom: none;
+    }
+    
+    .performance-table td {
+        padding: 16px;
+        font-size: 14px;
+        color: #212529;
+    }
+    
+    .performance-table td.text-right {
+        text-align: right;
+    }
+    
+    .performance-table td.text-center {
+        text-align: center;
+    }
+    
+    .agent-name-cell {
+        font-weight: 600;
+    }
+    
+    .agent-id-cell {
+        font-size: 13px;
+        color: #6c757d;
+    }
+    
+    .table-risk-badge {
+        display: inline-block;
+        padding: 4px 10px;
+        border-radius: 4px;
+        font-weight: 500;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .table-risk-badge.HIGH {
+        background: #fff5f5;
+        color: #c53030;
+        border: 1px solid #fc8181;
+    }
+    
+    .table-risk-badge.MEDIUM {
+        background: #fffbeb;
+        color: #d97706;
+        border: 1px solid #fbbf24;
+    }
+    
+    .table-risk-badge.LOW {
+        background: #f0fdf4;
+        color: #15803d;
+        border: 1px solid #86efac;
+    }
+    
+    .progress-cell {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    
+    .progress-bar-small {
+        flex: 1;
+        height: 6px;
+        background: #e9ecef;
+        border-radius: 3px;
+        overflow: hidden;
+    }
+    
+    .progress-fill-small {
+        height: 100%;
+        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    }
+    
+    .progress-percentage {
+        font-weight: 600;
+        font-size: 13px;
+        min-width: 45px;
+        text-align: right;
+    }
+    
+    .score-cell {
+        font-weight: 600;
+    }
+    
+    .score-high {
+        color: #15803d;
+    }
+    
+    .score-medium {
+        color: #d97706;
+    }
+    
+    .score-low {
+        color: #c53030;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+{% if error %}
+    <div class="alert alert-error">
+        <strong>Error:</strong> {{ error }}
+    </div>
+{% else %}
+    <div class="manager-header">
+        <h1>{{ manager.name }}</h1>
+        <p>{{ manager.area_name }} • {{ manager.email }}</p>
+    </div>
+    
+    <div class="summary-grid">
+        <div class="summary-card highlight">
+            <h3>{{ summary.total_agents }}</h3>
+            <p>Total Agents</p>
+        </div>
+        <div class="summary-card">
+            <h3>₱{{ summary.total_sales|floatformat:0 }}</h3>
+            <p>Total Sales</p>
+        </div>
+        <div class="summary-card">
+            <h3>{{ summary.achievement_percentage|floatformat:1 }}%</h3>
+            <p>Target Achievement</p>
+        </div>
+        <div class="summary-card">
+            <h3>{{ summary.average_score|floatformat:1 }}%</h3>
+            <p>Average Score</p>
+        </div>
+    </div>
+    
+    <div class="summary-card">
+        <p style="margin-bottom: 12px; font-weight: 600;">Risk Distribution</p>
+        <div class="risk-summary">
+            <div class="risk-item">
+                <div class="risk-dot high"></div>
+                <span>{{ summary.high_risk_count }} High Risk</span>
+            </div>
+            <div class="risk-item">
+                <div class="risk-dot medium"></div>
+                <span>{{ summary.medium_risk_count }} Medium Risk</span>
+            </div>
+            <div class="risk-item">
+                <div class="risk-dot low"></div>
+                <span>{{ summary.low_risk_count }} Low Risk</span>
+            </div>
+        </div>
+    </div>
+    
+    {% if agents %}
+    <div class="table-section">
+        <h2>Sales Performance Table</h2>
+        <div class="performance-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Agent</th>
+                        <th class="text-right">Target</th>
+                        <th class="text-right">Actual Sales</th>
+                        <th>Achievement</th>
+                        <th class="text-center">Score</th>
+                        <th class="text-center">Calls</th>
+                        <th class="text-center">Meetings</th>
+                        <th class="text-center">Leads</th>
+                        <th class="text-center">Deals</th>
+                        <th class="text-center">Risk</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in agents %}
+                    <tr>
+                        <td>
+                            <div class="agent-name-cell">{{ item.agent.name }}</div>
+                            <div class="agent-id-cell">{{ item.agent_id }}</div>
+                        </td>
+                        <td class="text-right">₱{{ item.performance.sales.target|floatformat:0 }}</td>
+                        <td class="text-right">₱{{ item.performance.sales.actual|floatformat:0 }}</td>
+                        <td>
+                            <div class="progress-cell">
+                                <div class="progress-bar-small">
+                                    <div class="progress-fill-small" style="width: {{ item.performance.sales.percentage|floatformat:0 }}%"></div>
+                                </div>
+                                <span class="progress-percentage">{{ item.performance.sales.percentage|floatformat:0 }}%</span>
+                            </div>
+                        </td>
+                        <td class="text-center">
+                            {% if item.performance.overall_score >= 70 %}
+                            <span class="score-cell score-high">{{ item.performance.overall_score|floatformat:0 }}%</span>
+                            {% elif item.performance.overall_score >= 50 %}
+                            <span class="score-cell score-medium">{{ item.performance.overall_score|floatformat:0 }}%</span>
+                            {% else %}
+                            <span class="score-cell score-low">{{ item.performance.overall_score|floatformat:0 }}%</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-center">{{ item.performance.activities.calls.count }}</td>
+                        <td class="text-center">{{ item.performance.activities.meetings.count }}</td>
+                        <td class="text-center">{{ item.performance.activities.leads.count }}</td>
+                        <td class="text-center">{{ item.performance.activities.deals.count }}</td>
+                        <td class="text-center">
+                            <span class="table-risk-badge {{ item.prediction.risk_level }}">{{ item.prediction.risk_level }}</span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <div class="agents-section">
+        <h2>Team Performance (Card View)</h2>
+        <div class="agents-grid">
+            {% for item in agents %}
+            <div class="agent-card">
+                <div class="agent-header">
+                    <div>
+                        <div class="agent-name">{{ item.agent.name }}</div>
+                        <div class="agent-id">{{ item.agent_id }}</div>
+                    </div>
+                    <div class="risk-badge risk-{{ item.prediction.risk_level }}">
+                        {{ item.prediction.risk_level }}
+                    </div>
+                </div>
+                
+                {% if item.performance %}
+                <div class="metrics-grid">
+                    <div class="metric">
+                        <div class="metric-value">{{ item.performance.activities.calls.count }}</div>
+                        <div class="metric-label">Calls</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value">{{ item.performance.activities.meetings.count }}</div>
+                        <div class="metric-label">Meetings</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value">{{ item.performance.activities.leads.count }}</div>
+                        <div class="metric-label">Leads</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value">{{ item.performance.activities.deals.count }}</div>
+                        <div class="metric-label">Deals</div>
+                    </div>
+                </div>
+                
+                <div style="margin: 20px 0;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <span style="font-size: 13px; font-weight: 500; color: #495057;">Sales Progress</span>
+                        <span style="font-size: 13px; font-weight: 600; color: #212529;">{{ item.performance.sales.percentage|floatformat:0 }}%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: {{ item.performance.sales.percentage|floatformat:0 }}%"></div>
+                    </div>
+                    <div class="progress-label">₱{{ item.performance.sales.actual|floatformat:0 }} of ₱{{ item.performance.sales.target|floatformat:0 }}</div>
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% else %}
+    <div style="text-align: center; padding: 64px 32px;">
+        <p style="color: #6c757d;">No agents found in this area</p>
+    </div>
+    {% endif %}
+{% endif %}
+{% endblock %}
