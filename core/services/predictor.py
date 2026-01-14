@@ -121,14 +121,23 @@ class PredictorService:
         # Get agent info
         agent = Agent.get(agent_id)
         
+        # Handle probability array (may have 1 or 2 values depending on classes seen in training)
+        if len(probability) == 2:
+            prob_miss = probability[0]
+            prob_hit = probability[1]
+        else:
+            # Only one class seen in training data
+            prob_miss = probability[0] if prediction == 0 else 1 - probability[0]
+            prob_hit = 1 - prob_miss
+        
         result = {
             'agent_id': agent_id,
             'agent_name': agent.get('name'),
             'prediction': 'HIT' if prediction == 1 else 'MISS',
             'confidence': max(probability) * 100,
-            'probability_hit': probability[1] * 100,
-            'probability_miss': probability[0] * 100,
-            'risk_level': PredictorService.calculate_risk_level(probability[0]),
+            'probability_hit': prob_hit * 100,
+            'probability_miss': prob_miss * 100,
+            'risk_level': PredictorService.calculate_risk_level(prob_miss),
             'features': features.to_dict('records')[0]
         }
         
