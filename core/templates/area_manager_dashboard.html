@@ -642,7 +642,9 @@
                 <div class="agent-card-header">
                     <div class="agent-header">
                         <div>
-                            <div class="agent-name">{{ item.agent.name }}</div>
+                            <a href="{% url 'agent_detail' item.agent_id %}" style="text-decoration: none; color: inherit;">
+                                <div class="agent-name" style="cursor: pointer;">{{ item.agent.name }}</div>
+                            </a>
                             <div class="agent-id">{{ item.agent_id }}</div>
                         </div>
                         <div class="risk-badge risk-{{ item.prediction.risk_level }}">
