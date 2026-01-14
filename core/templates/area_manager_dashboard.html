@@ -639,7 +639,7 @@
         <div class="agents-grid">
             {% for item in agents %}
             <div class="agent-card">
-                <div class="agent-card-header" onclick="toggleAgentDetails('agent-{{ forloop.counter }}')">
+                <div class="agent-card-header">
                     <div class="agent-header">
                         <div>
                             <div class="agent-name">{{ item.agent.name }}</div>
@@ -682,7 +682,7 @@
                     </div>
                     {% endif %}
                     
-                    <button class="expand-btn" onclick="event.stopPropagation();">
+                    <button type="button" class="expand-btn" onclick="toggleAgentDetails('agent-{{ forloop.counter }}')">
                         <span>View Details</span>
                         <span class="expand-icon" id="icon-agent-{{ forloop.counter }}">▼</span>
                     </button>
