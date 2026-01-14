@@ -2,9 +2,10 @@
 Hierarchy Performance Service
 Aggregates performance data for Area Managers and Division Heads
 """
-from core.models import Agent, AreaManager, DivisionHead
+from core.models import Agent, AreaManager, DivisionHead, Activity, Sale, Lead, Product
 from core.services.performance import PerformanceService
 from core.services.predictor import PredictorService
+from core.services.sales_funnel import SalesFunnelService
 
 
 class HierarchyPerformanceService:
@@ -63,11 +64,55 @@ class HierarchyPerformanceService:
                     'confidence': 0
                 }
             
+            # Get sales funnel metrics
+            try:
+                funnel = SalesFunnelService.get_funnel_metrics(agent_id)
+            except:
+                funnel = None
+            
+            # Get recent activities (last 5)
+            recent_activities = Activity.get_by_agent(agent_id)
+            recent_activities = sorted(recent_activities, key=lambda x: x.get('created_at', x.get('date')), reverse=True)[:5]
+            
+            # Get recent sales with product details
+            sales = Sale.get_by_agent(agent_id)
+            recent_sales = []
+            for sale in sorted(sales, key=lambda x: x['date'], reverse=True)[:5]:
+                sale_data = dict(sale)
+                if sale.get('product_id'):
+                    product = Product.get(sale['product_id'])
+                    sale_data['product'] = product
+                else:
+                    sale_data['product'] = None
+                recent_sales.append(sale_data)
+            
+            # Get product performance (group sales by product)
+            product_performance = {}
+            for sale in sales:
+                if sale.get('product_id'):
+                    pid = sale['product_id']
+                    if pid not in product_performance:
+                        product = Product.get(pid)
+                        product_performance[pid] = {
+                            'product': product,
+                            'count': 0,
+                            'total_amount': 0
+                        }
+                    product_performance[pid]['count'] += 1
+                    product_performance[pid]['total_amount'] += sale['amount']
+            
+            # Sort products by total amount
+            top_products = sorted(product_performance.values(), key=lambda x: x['total_amount'], reverse=True)[:3]
+            
             agents_data.append({
                 'agent': agent,
                 'agent_id': agent_id,
                 'performance': performance,
-                'prediction': prediction
+                'prediction': prediction,
+                'funnel': funnel,
+                'recent_activities': recent_activities,
+                'recent_sales': recent_sales,
+                'top_products': top_products
             })
             
             # Aggregate metrics
