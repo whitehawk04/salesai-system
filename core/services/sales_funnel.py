@@ -37,7 +37,7 @@ class SalesFunnelService:
         deals_count = 0
         
         for activity in activities:
-            activity_type = activity.get('type', '')  # Activity model stores as 'type' not 'activity_type'
+            activity_type = activity.get('activity_type', '')  # Fixed: use 'activity_type' field
             if activity_type == 'call':
                 calls_count += 1
             elif activity_type == 'lead':
