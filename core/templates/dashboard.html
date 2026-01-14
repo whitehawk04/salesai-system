@@ -207,6 +207,117 @@
         color: #6c757d;
         font-size: 14px;
     }
+    
+    /* ============================================
+       RESPONSIVE MEDIA QUERIES
+       ============================================ */
+    
+    /* Tablet and below (768px) */
+    @media (max-width: 768px) {
+        .stats-grid {
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+        
+        .stat-card {
+            padding: 20px;
+        }
+        
+        .stat-card h3 {
+            font-size: 28px;
+        }
+        
+        .agent-card {
+            padding: 16px;
+        }
+        
+        .agent-name {
+            font-size: 16px;
+        }
+        
+        .agent-id {
+            font-size: 12px;
+        }
+        
+        .metrics-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+        
+        .metric {
+            padding: 12px 8px;
+        }
+        
+        .metric-value {
+            font-size: 20px;
+        }
+        
+        .metric-label {
+            font-size: 11px;
+        }
+        
+        .risk-badge {
+            font-size: 10px;
+            padding: 4px 10px;
+        }
+        
+        .prediction-box {
+            padding: 12px;
+        }
+    }
+    
+    /* Mobile (480px) */
+    @media (max-width: 480px) {
+        .stat-card h3 {
+            font-size: 24px;
+        }
+        
+        .stat-card p {
+            font-size: 13px;
+        }
+        
+        .agent-card {
+            padding: 14px;
+        }
+        
+        .agent-header {
+            flex-direction: column;
+            gap: 12px;
+            align-items: flex-start;
+        }
+        
+        .risk-badge {
+            align-self: flex-start;
+        }
+        
+        .metrics-grid {
+            gap: 8px;
+        }
+        
+        .metric {
+            padding: 10px 6px;
+        }
+        
+        .metric-value {
+            font-size: 18px;
+        }
+        
+        .metric-label {
+            font-size: 10px;
+        }
+        
+        .progress-label {
+            font-size: 11px;
+        }
+        
+        .prediction-result {
+            font-size: 13px;
+        }
+        
+        .prediction-info {
+            font-size: 11px;
+        }
+    }
 </style>
 {% endblock %}
 

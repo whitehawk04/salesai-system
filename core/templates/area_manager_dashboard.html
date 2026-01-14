@@ -531,6 +531,175 @@
         font-size: 13px;
         font-style: italic;
     }
+    
+    /* ============================================
+       RESPONSIVE MEDIA QUERIES
+       ============================================ */
+    
+    /* Tablet and below (768px) */
+    @media (max-width: 768px) {
+        .manager-header {
+            padding: 24px 20px;
+        }
+        
+        .manager-header h1 {
+            font-size: 24px;
+        }
+        
+        .manager-header p {
+            font-size: 14px;
+        }
+        
+        .summary-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+        
+        .summary-card {
+            padding: 16px;
+        }
+        
+        .summary-card h3 {
+            font-size: 22px;
+        }
+        
+        .summary-card p {
+            font-size: 13px;
+        }
+        
+        /* Hide table on mobile, show cards instead */
+        .table-section {
+            display: none;
+        }
+        
+        .agent-card {
+            padding: 16px;
+        }
+        
+        .metrics-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+        
+        .funnel-mini {
+            gap: 8px;
+        }
+        
+        .funnel-mini-item {
+            min-width: 70px;
+            padding: 8px 6px;
+        }
+        
+        .funnel-mini-value {
+            font-size: 16px;
+        }
+        
+        .funnel-mini-label {
+            font-size: 10px;
+        }
+        
+        .detail-section {
+            padding: 12px;
+        }
+        
+        .activity-item {
+            font-size: 12px;
+            padding: 6px 10px;
+        }
+        
+        .sales-item {
+            font-size: 12px;
+            padding: 8px 10px;
+        }
+        
+        .product-item {
+            font-size: 12px;
+            padding: 8px 10px;
+        }
+        
+        .product-stats {
+            font-size: 11px;
+            gap: 12px;
+        }
+    }
+    
+    /* Mobile (480px) */
+    @media (max-width: 480px) {
+        .manager-header {
+            padding: 20px 16px;
+        }
+        
+        .manager-header h1 {
+            font-size: 20px;
+        }
+        
+        .manager-header p {
+            font-size: 13px;
+        }
+        
+        .summary-grid {
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+        
+        .summary-card {
+            padding: 14px;
+        }
+        
+        .summary-card h3 {
+            font-size: 20px;
+        }
+        
+        .agent-card {
+            padding: 14px;
+        }
+        
+        .agent-header {
+            flex-direction: column;
+            gap: 12px;
+            align-items: flex-start;
+        }
+        
+        .risk-badge {
+            align-self: flex-start;
+        }
+        
+        .funnel-mini {
+            flex-direction: column;
+        }
+        
+        .funnel-mini-item {
+            min-width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 12px;
+        }
+        
+        .funnel-mini-value {
+            font-size: 18px;
+        }
+        
+        .funnel-mini-label {
+            font-size: 12px;
+        }
+        
+        .expand-btn {
+            width: 100%;
+            justify-content: center;
+        }
+        
+        .sales-item {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 6px;
+        }
+        
+        .risk-summary {
+            flex-direction: column;
+            gap: 8px;
+        }
+    }
 </style>
 {% endblock %}
 
