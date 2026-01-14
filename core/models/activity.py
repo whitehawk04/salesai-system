@@ -19,9 +19,9 @@ class Activity:
         activity = {
             "_id": activity_id,
             "agent_id": agent_id,
-            "type": activity_type,
+            "activity_type": activity_type,
             "value": value,
-            "date": datetime.now(),
+            "created_at": datetime.now(),  # Changed from "date" to "created_at"
             "notes": notes
         }
         db.activities.insert_one(activity)
@@ -38,7 +38,7 @@ class Activity:
         query = {"agent_id": agent_id}
         
         if activity_type:
-            query["type"] = activity_type
+            query["activity_type"] = activity_type
         
         if start_date or end_date:
             date_query = {}
@@ -46,7 +46,7 @@ class Activity:
                 date_query["$gte"] = start_date
             if end_date:
                 date_query["$lte"] = end_date
-            query["date"] = date_query
+            query["created_at"] = date_query  # Changed from "date" to "created_at"
         
         return list(db.activities.find(query))
     
@@ -56,7 +56,7 @@ class Activity:
         query = {"agent_id": agent_id}
         
         if activity_type:
-            query["type"] = activity_type
+            query["activity_type"] = activity_type
         
         if start_date or end_date:
             date_query = {}
@@ -64,7 +64,7 @@ class Activity:
                 date_query["$gte"] = start_date
             if end_date:
                 date_query["$lte"] = end_date
-            query["date"] = date_query
+            query["created_at"] = date_query  # Changed from "date" to "created_at"
         
         return db.activities.count_documents(query)
     
