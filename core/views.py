@@ -408,12 +408,36 @@ def dashboard(request):
     
     except Exception as e:
         import traceback
-        context = {
+        error_details = {
             'error': str(e),
             'traceback': traceback.format_exc(),
-            'user': request.user
+            'user': request.user if hasattr(request, 'user') else None,
+            'company_id': company_id if 'company_id' in locals() else 'Not set',
+            'stats': {
+                'total_agents': 0,
+                'total_area_managers': 0,
+                'total_division_heads': 0,
+                'total_sales': 0,
+                'total_target': 0,
+                'achievement_rate': 0,
+                'total_leads': 0,
+                'total_sales_count': 0,
+                'high_risk_agents': 0,
+                'medium_risk_agents': 0,
+                'low_risk_agents': 0
+            },
+            'agents': [],
+            'recent_sales': [],
+            'company': {'name': 'Error loading company', 'status': 'unknown'},
+            'subscription': {'status': 'unknown'},
+            'monthly_cost': 0
         }
-        return render(request, 'company_admin_dashboard.html', context)
+        
+        # Log the error
+        print(f"Dashboard Error: {str(e)}")
+        print(traceback.format_exc())
+        
+        return render(request, 'company_admin_dashboard.html', error_details)
 
 
 def agent_detail(request, agent_id):

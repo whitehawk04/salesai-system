@@ -4,6 +4,21 @@
 
 {% block content %}
 <div class="admin-dashboard">
+    
+    {% if error %}
+    <!-- Error Display for Debugging -->
+    <div style="background: #fee2e2; border: 2px solid #ef4444; padding: 2rem; border-radius: 12px; margin-bottom: 2rem;">
+        <h2 style="color: #991b1b; margin-bottom: 1rem;">⚠️ Dashboard Error</h2>
+        <p style="color: #991b1b; margin-bottom: 1rem;"><strong>Error:</strong> {{ error }}</p>
+        {% if traceback %}
+        <details style="margin-top: 1rem;">
+            <summary style="cursor: pointer; color: #991b1b; font-weight: 600;">Show Technical Details</summary>
+            <pre style="background: white; padding: 1rem; margin-top: 0.5rem; overflow: auto; border-radius: 4px; color: #1f2937; font-size: 0.85rem;">{{ traceback }}</pre>
+        </details>
+        {% endif %}
+        <p style="margin-top: 1rem; color: #991b1b;">Company ID: {{ company_id|default:"Not set" }}</p>
+    </div>
+    {% endif %}
     <!-- Header Section -->
     <div class="dashboard-header">
         <div class="header-content">
