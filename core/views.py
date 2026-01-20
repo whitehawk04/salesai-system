@@ -129,66 +129,113 @@ def division_head_dashboard_view(request):
 
 def dashboard(request):
     """
-    Main dashboard showing all agents with performance and predictions
+    Company Admin Dashboard - Comprehensive overview of entire organization
     """
     try:
-        # Get all agents
-        agents = Agent.get_all()
+        user = request.user
+        company_id = user.get('company_id')
         
-        # Prepare dashboard data
-        dashboard_data = []
+        # Import additional models
+        from core.models import Company, Subscription, Sale, Lead
+        
+        # Get company info
+        company = Company.get(company_id)
+        subscription = Subscription.get_by_company(company_id)
+        
+        # Get all organizational data
+        agents = Agent.get_all(company_id)
+        area_managers = AreaManager.get_all(company_id)
+        division_heads = DivisionHead.get_all(company_id)
+        
+        # Calculate company-wide statistics
+        total_sales = 0
+        total_target = 0
+        total_leads = 0
+        
+        high_risk_agents = 0
+        medium_risk_agents = 0
+        low_risk_agents = 0
+        
+        agent_data_list = []
         
         for agent in agents:
             agent_id = agent['_id']
             
-            # Get performance data
-            performance = PerformanceService.get_agent_performance(agent_id)
+            # Get performance
+            performance = PerformanceService.get_agent_performance(agent_id, company_id)
+            total_sales += performance.get('total_sales', 0)
+            total_target += agent.get('monthly_target', 0)
             
-            # Get prediction (if model exists)
+            # Get prediction
             try:
                 prediction = PredictorService.predict_agent(agent_id)
-            except FileNotFoundError:
-                prediction = {
-                    'prediction': 'N/A',
-                    'risk_level': 'UNKNOWN',
-                    'confidence': 0
-                }
-            except Exception as e:
-                print(f"Prediction error for {agent_id}: {e}")
-                prediction = {
-                    'prediction': 'ERROR',
-                    'risk_level': 'UNKNOWN',
-                    'confidence': 0
-                }
+                risk_level = prediction.get('risk_level', 'UNKNOWN')
+                
+                if risk_level == 'HIGH':
+                    high_risk_agents += 1
+                elif risk_level == 'MEDIUM':
+                    medium_risk_agents += 1
+                elif risk_level == 'LOW':
+                    low_risk_agents += 1
+            except:
+                prediction = {'risk_level': 'UNKNOWN', 'confidence': 0}
             
-            # Combine data
-            agent_data = {
+            agent_data_list.append({
                 'agent': agent,
-                'agent_id': agent_id,
                 'performance': performance,
                 'prediction': prediction
-            }
-            
-            dashboard_data.append(agent_data)
+            })
         
-        # Sort by risk level (HIGH first)
+        # Get leads count
+        from core.database import db
+        total_leads = db.leads.count_documents({"company_id": company_id})
+        total_sales_count = db.sales.count_documents({"company_id": company_id})
+        
+        # Calculate achievement rate
+        achievement_rate = (total_sales / total_target * 100) if total_target > 0 else 0
+        
+        # Calculate monthly cost
+        monthly_cost = Subscription.calculate_monthly_cost(company_id)
+        
+        # Sort agents by risk
         risk_order = {'HIGH': 0, 'MEDIUM': 1, 'LOW': 2, 'UNKNOWN': 3}
-        dashboard_data.sort(key=lambda x: risk_order.get(x['prediction']['risk_level'], 999))
+        agent_data_list.sort(key=lambda x: risk_order.get(x['prediction']['risk_level'], 999))
+        
+        # Get recent activity (last 5 sales)
+        recent_sales = list(db.sales.find({"company_id": company_id}).sort("date", -1).limit(5))
         
         context = {
-            'dashboard_data': dashboard_data,
-            'total_agents': len(agents)
+            'user': user,
+            'company': company,
+            'subscription': subscription,
+            'monthly_cost': monthly_cost,
+            'stats': {
+                'total_agents': len(agents),
+                'total_area_managers': len(area_managers),
+                'total_division_heads': len(division_heads),
+                'total_sales': total_sales,
+                'total_target': total_target,
+                'achievement_rate': achievement_rate,
+                'total_leads': total_leads,
+                'total_sales_count': total_sales_count,
+                'high_risk_agents': high_risk_agents,
+                'medium_risk_agents': medium_risk_agents,
+                'low_risk_agents': low_risk_agents
+            },
+            'agents': agent_data_list[:10],  # Show top 10 agents
+            'recent_sales': recent_sales
         }
         
-        return render(request, 'dashboard.html', context)
+        return render(request, 'company_admin_dashboard.html', context)
     
     except Exception as e:
+        import traceback
         context = {
             'error': str(e),
-            'dashboard_data': [],
-            'total_agents': 0
+            'traceback': traceback.format_exc(),
+            'user': request.user
         }
-        return render(request, 'dashboard.html', context)
+        return render(request, 'company_admin_dashboard.html', context)
 
 
 def agent_detail(request, agent_id):
