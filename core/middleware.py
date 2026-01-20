@@ -2,6 +2,7 @@
 Middleware for authentication and multi-tenancy
 """
 from django.http import JsonResponse
+from django.shortcuts import redirect
 from core.models import User, Subscription
 
 
@@ -45,12 +46,17 @@ class AuthenticationMiddleware:
                 else:
                     request.user = None
             
-            # If not authenticated, return 401
+            # If not authenticated, redirect to login or return 401
             if not request.user:
-                return JsonResponse({
-                    'error': 'Authentication required',
-                    'message': 'Please login to access this resource'
-                }, status=401)
+                # For API requests, return JSON 401
+                if request.path.startswith('/api/'):
+                    return JsonResponse({
+                        'error': 'Authentication required',
+                        'message': 'Please login to access this resource'
+                    }, status=401)
+                # For regular pages, redirect to login
+                else:
+                    return redirect('/login/')
         else:
             request.user = None
         
