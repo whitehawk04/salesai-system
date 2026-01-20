@@ -1,0 +1,230 @@
+{% extends 'base.html' %}
+
+{% block title %}User Management - SalesAI{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>User Management 👥</h1>
+    <p class="subtitle">Create and manage user accounts for your organization</p>
+    
+    <div class="card">
+        <h2>Create New User</h2>
+        <form id="createUserForm">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="user_role">User Role</label>
+                    <select id="user_role" name="role" required>
+                        <option value="">Select Role</option>
+                        <option value="division_head">Division Head</option>
+                        <option value="area_manager">Area Manager</option>
+                        <option value="agent">Sales Agent</option>
+                        <option value="company_admin">Company Admin</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="user_name">Full Name</label>
+                    <input type="text" id="user_name" name="name" required>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="user_email">Email Address</label>
+                    <input type="email" id="user_email" name="email" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="user_phone">Phone Number</label>
+                    <input type="tel" id="user_phone" name="phone">
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="user_password">Temporary Password</label>
+                    <input type="password" id="user_password" name="password" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="related_id">Link to Profile ID (Optional)</label>
+                    <input type="text" id="related_id" name="related_id" placeholder="e.g., AGENT-123">
+                </div>
+            </div>
+            
+            <button type="submit" class="btn btn-primary">Create User</button>
+        </form>
+    </div>
+    
+    <div class="card">
+        <h2>Existing Users</h2>
+        <div id="usersList">
+            <p>Loading users...</p>
+        </div>
+    </div>
+</div>
+
+<style>
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .form-group label {
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+    }
+    
+    .form-group input,
+    .form-group select {
+        padding: 0.75rem;
+        border: 2px solid #e5e7eb;
+        border-radius: 8px;
+        font-size: 1rem;
+    }
+    
+    .form-group input:focus,
+    .form-group select:focus {
+        outline: none;
+        border-color: #667eea;
+    }
+    
+    .btn {
+        padding: 0.75rem 2rem;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+    
+    .user-card {
+        border: 1px solid #e5e7eb;
+        padding: 1rem;
+        margin-bottom: 0.5rem;
+        border-radius: 8px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .user-info {
+        flex: 1;
+    }
+    
+    .role-badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 12px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin-left: 0.5rem;
+    }
+    
+    .role-company_admin { background: #dbeafe; color: #1e40af; }
+    .role-division_head { background: #fef3c7; color: #92400e; }
+    .role-area_manager { background: #d1fae5; color: #065f46; }
+    .role-agent { background: #e0e7ff; color: #3730a3; }
+    
+    @media (max-width: 768px) {
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<script>
+    // Load existing users
+    async function loadUsers() {
+        try {
+            const response = await fetch('/api/users/');
+            const data = await response.json();
+            
+            const usersList = document.getElementById('usersList');
+            
+            if (data.users && data.users.length > 0) {
+                usersList.innerHTML = data.users.map(user => `
+                    <div class="user-card">
+                        <div class="user-info">
+                            <strong>${user.name || user.email}</strong>
+                            <span class="role-badge role-${user.role}">${getRoleName(user.role)}</span>
+                            <br>
+                            <small>${user.email}</small>
+                        </div>
+                        <div>
+                            <span class="${user.is_active ? 'text-success' : 'text-danger'}">
+                                ${user.is_active ? '✓ Active' : '✗ Inactive'}
+                            </span>
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                usersList.innerHTML = '<p>No users found.</p>';
+            }
+        } catch (error) {
+            console.error('Error loading users:', error);
+            document.getElementById('usersList').innerHTML = '<p class="error">Error loading users.</p>';
+        }
+    }
+    
+    function getRoleName(role) {
+        const roleNames = {
+            'company_admin': 'Company Admin',
+            'division_head': 'Division Head',
+            'area_manager': 'Area Manager',
+            'agent': 'Sales Agent'
+        };
+        return roleNames[role] || role;
+    }
+    
+    // Create user form submission
+    document.getElementById('createUserForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const formData = new FormData(e.target);
+        const data = Object.fromEntries(formData.entries());
+        
+        try {
+            const response = await fetch('/api/users/create/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            });
+            
+            const result = await response.json();
+            
+            if (response.ok) {
+                alert('User created successfully!');
+                e.target.reset();
+                loadUsers();
+            } else {
+                alert('Error: ' + (result.message || result.error));
+            }
+        } catch (error) {
+            alert('Error creating user: ' + error.message);
+        }
+    });
+    
+    // Load users on page load
+    loadUsers();
+</script>
+{% endblock %}

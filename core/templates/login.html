@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In - SalesAI</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .login-container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 1000px;
+            width: 100%;
+            overflow: hidden;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .login-left {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .login-left h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .login-left p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            line-height: 1.6;
+        }
+
+        .login-right {
+            padding: 3rem;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        h2 {
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+            font-size: 1.8rem;
+        }
+
+        .subtitle {
+            color: #6b7280;
+            margin-bottom: 2rem;
+        }
+
+        .role-selector {
+            margin-bottom: 2rem;
+        }
+
+        .role-selector label {
+            display: block;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 0.75rem;
+        }
+
+        .role-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+        }
+
+        .role-option {
+            position: relative;
+        }
+
+        .role-option input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+        }
+
+        .role-option label {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .role-option input[type="radio"]:checked + label {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+
+        .role-option label:hover {
+            border-color: #667eea;
+        }
+
+        .role-icon {
+            font-size: 1.5rem;
+        }
+
+        .role-info {
+            flex: 1;
+        }
+
+        .role-title {
+            font-weight: 600;
+            color: #1f2937;
+            display: block;
+            margin-bottom: 0.25rem;
+        }
+
+        .role-desc {
+            font-size: 0.85rem;
+            color: #6b7280;
+            font-weight: normal;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            display: none;
+        }
+
+        .alert.error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+
+        .alert.success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+
+        .divider {
+            margin: 1.5rem 0;
+            text-align: center;
+            color: #6b7280;
+            position: relative;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            width: 45%;
+            height: 1px;
+            background: #e5e7eb;
+        }
+
+        .divider::before {
+            left: 0;
+        }
+
+        .divider::after {
+            right: 0;
+        }
+
+        .register-link {
+            text-align: center;
+            margin-top: 1.5rem;
+            color: #6b7280;
+        }
+
+        .register-link a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .register-link a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .login-container {
+                grid-template-columns: 1fr;
+            }
+
+            .login-left {
+                display: none;
+            }
+
+            .role-options {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 1rem;
+        }
+
+        .spinner {
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-left">
+            <h1>🤖 SalesAI</h1>
+            <p>AI-Powered Sales Performance Management System for Philippine businesses.</p>
+            <p style="margin-top: 2rem;">Track performance, predict outcomes, and optimize your sales team with intelligent insights.</p>
+        </div>
+
+        <div class="login-right">
+            <div class="logo">🤖 SalesAI</div>
+            
+            <h2>Welcome Back</h2>
+            <p class="subtitle">Sign in to your account</p>
+
+            <div id="alert" class="alert"></div>
+            <div id="loading" class="loading">
+                <div class="spinner"></div>
+                <p>Signing in...</p>
+            </div>
+
+            <form id="loginForm">
+                <div class="role-selector">
+                    <label>Select Your Role</label>
+                    <div class="role-options">
+                        <div class="role-option">
+                            <input type="radio" name="role" id="role_admin" value="company_admin" checked>
+                            <label for="role_admin">
+                                <span class="role-icon">👨‍💼</span>
+                                <div class="role-info">
+                                    <span class="role-title">Company Admin</span>
+                                    <span class="role-desc">Full access & user management</span>
+                                </div>
+                            </label>
+                        </div>
+
+                        <div class="role-option">
+                            <input type="radio" name="role" id="role_division" value="division_head">
+                            <label for="role_division">
+                                <span class="role-icon">👔</span>
+                                <div class="role-info">
+                                    <span class="role-title">Division Head</span>
+                                    <span class="role-desc">Division oversight</span>
+                                </div>
+                            </label>
+                        </div>
+
+                        <div class="role-option">
+                            <input type="radio" name="role" id="role_manager" value="area_manager">
+                            <label for="role_manager">
+                                <span class="role-icon">👨‍💻</span>
+                                <div class="role-info">
+                                    <span class="role-title">Area Manager</span>
+                                    <span class="role-desc">Team management</span>
+                                </div>
+                            </label>
+                        </div>
+
+                        <div class="role-option">
+                            <input type="radio" name="role" id="role_agent" value="agent">
+                            <label for="role_agent">
+                                <span class="role-icon">👤</span>
+                                <div class="role-info">
+                                    <span class="role-title">Sales Agent</span>
+                                    <span class="role-desc">Personal dashboard</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email" required placeholder="you@company.com">
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required placeholder="••••••••">
+                </div>
+
+                <button type="submit" class="btn">Sign In</button>
+            </form>
+
+            <div class="divider">or</div>
+
+            <div class="register-link">
+                Don't have an account? <a href="/register/">Register Your Company</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const alert = document.getElementById('alert');
+            const loading = document.getElementById('loading');
+            const form = document.getElementById('loginForm');
+            
+            // Get form data
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const selectedRole = document.querySelector('input[name="role"]:checked').value;
+            
+            // Show loading
+            loading.style.display = 'block';
+            form.style.display = 'none';
+            alert.style.display = 'none';
+            
+            try {
+                const response = await fetch('/login/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        password: password
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    // Check if user role matches selected role
+                    if (data.user.role !== selectedRole) {
+                        throw new Error(`You selected ${getRoleName(selectedRole)}, but your account is registered as ${getRoleName(data.user.role)}`);
+                    }
+                    
+                    // Success - redirect based on role
+                    alert.className = 'alert success';
+                    alert.textContent = 'Login successful! Redirecting...';
+                    alert.style.display = 'block';
+                    
+                    setTimeout(() => {
+                        redirectBasedOnRole(data.user.role);
+                    }, 1000);
+                } else {
+                    throw new Error(data.message || data.error || 'Login failed');
+                }
+            } catch (error) {
+                // Show error
+                loading.style.display = 'none';
+                form.style.display = 'block';
+                alert.className = 'alert error';
+                alert.textContent = error.message;
+                alert.style.display = 'block';
+            }
+        });
+        
+        function getRoleName(role) {
+            const roleNames = {
+                'company_admin': 'Company Admin',
+                'division_head': 'Division Head',
+                'area_manager': 'Area Manager',
+                'agent': 'Sales Agent'
+            };
+            return roleNames[role] || role;
+        }
+        
+        function redirectBasedOnRole(role) {
+            switch(role) {
+                case 'company_admin':
+                    window.location.href = '/dashboard/';
+                    break;
+                case 'division_head':
+                    window.location.href = '/division-head/dashboard/';
+                    break;
+                case 'area_manager':
+                    window.location.href = '/area-manager/dashboard/';
+                    break;
+                case 'agent':
+                    window.location.href = '/agent/dashboard/';
+                    break;
+                default:
+                    window.location.href = '/dashboard/';
+            }
+        }
+    </script>
+</body>
+</html>

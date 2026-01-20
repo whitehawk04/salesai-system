@@ -267,6 +267,57 @@ def change_password(request):
         }, status=400)
 
 
+def user_management_page(request):
+    """User management page for company admins"""
+    return render(request, 'user_management.html')
+
+
+@csrf_exempt
+def list_users(request):
+    """List all users for the company (admin only)"""
+    if request.method != 'GET':
+        return JsonResponse({'error': 'Method not allowed'}, status=405)
+    
+    if not request.user:
+        return JsonResponse({'error': 'Authentication required'}, status=401)
+    
+    # Check if user is company admin
+    if request.user.get('role') not in [User.ROLE_COMPANY_ADMIN, User.ROLE_SUPER_ADMIN]:
+        return JsonResponse({
+            'error': 'Insufficient permissions',
+            'message': 'Only company admins can view users'
+        }, status=403)
+    
+    try:
+        company_id = request.user.get('company_id')
+        users = User.get_by_company(company_id)
+        
+        # Remove sensitive data
+        users_data = []
+        for user in users:
+            users_data.append({
+                'id': user['_id'],
+                'email': user['email'],
+                'name': user.get('name'),
+                'role': user['role'],
+                'phone': user.get('phone'),
+                'is_active': user.get('is_active'),
+                'created_at': user.get('created_at').isoformat() if user.get('created_at') else None,
+                'related_id': user.get('related_id')
+            })
+        
+        return JsonResponse({
+            'success': True,
+            'users': users_data
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'error': 'Failed to load users',
+            'message': str(e)
+        }, status=400)
+
+
 @csrf_exempt
 def create_user(request):
     """Create a new user for the company (admin only)"""

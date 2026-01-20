@@ -11,8 +11,11 @@ urlpatterns = [
     # Landing page (public)
     path('', views.landing_page, name='landing_page'),
     
-    # Dashboard and agent routes
-    path('dashboard/', views.dashboard, name='dashboard'),
+    # Role-specific dashboards
+    path('dashboard/', views.dashboard, name='dashboard'),  # Company Admin dashboard
+    path('agent/dashboard/', views.agent_dashboard, name='agent_dashboard'),
+    path('area-manager/dashboard/', views.area_manager_dashboard_view, name='area_manager_dashboard'),
+    path('division-head/dashboard/', views.division_head_dashboard_view, name='division_head_dashboard'),
     path('agent/<str:agent_id>/', views.agent_detail, name='agent_detail'),
     path('train/', views.train_model, name='train_model'),
     path('api/agents/', views.api_agents, name='api_agents'),
@@ -34,6 +37,10 @@ urlpatterns = [
     path('api/auth/logout/', views_auth.logout, name='api_logout'),
     path('api/auth/user/', views_auth.get_current_user, name='current_user'),
     path('api/auth/change-password/', views_auth.change_password, name='change_password'),
+    
+    # User management routes (company admin)
+    path('users/', views_auth.user_management_page, name='user_management'),
+    path('api/users/', views_auth.list_users, name='list_users'),
     path('api/users/create/', views_auth.create_user, name='create_user'),
     
     # Subscription routes

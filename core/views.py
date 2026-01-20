@@ -18,6 +18,115 @@ def landing_page(request):
     return render(request, 'landing.html')
 
 
+def agent_dashboard(request):
+    """
+    Dashboard for Sales Agents - Personal performance view
+    """
+    user = request.user
+    
+    # Check role
+    if user.get('role') != 'agent':
+        return JsonResponse({'error': 'Access denied'}, status=403)
+    
+    # Get agent data based on related_id
+    agent_id = user.get('related_id')
+    company_id = user.get('company_id')
+    
+    if not agent_id:
+        return JsonResponse({'error': 'Agent profile not linked'}, status=400)
+    
+    agent = Agent.get(agent_id)
+    if not agent:
+        return JsonResponse({'error': 'Agent not found'}, status=404)
+    
+    # Get performance metrics
+    performance = PerformanceService.get_agent_performance(agent_id, company_id)
+    predictions = PredictorService.get_agent_predictions(agent_id)
+    
+    context = {
+        'user': user,
+        'agent': agent,
+        'performance': performance,
+        'predictions': predictions
+    }
+    
+    return render(request, 'agent_dashboard.html', context)
+
+
+def area_manager_dashboard_view(request):
+    """
+    Dashboard for Area Managers - Team management view
+    """
+    user = request.user
+    
+    # Check role
+    if user.get('role') != 'area_manager':
+        return JsonResponse({'error': 'Access denied'}, status=403)
+    
+    # Get area manager data
+    manager_id = user.get('related_id')
+    company_id = user.get('company_id')
+    
+    if not manager_id:
+        return JsonResponse({'error': 'Area Manager profile not linked'}, status=400)
+    
+    manager = AreaManager.get(manager_id)
+    if not manager:
+        return JsonResponse({'error': 'Area Manager not found'}, status=404)
+    
+    # Get agents under this manager
+    agents = Agent.get_by_area_manager(manager_id)
+    
+    # Get performance data
+    performance_data = HierarchyPerformanceService.get_area_manager_performance(manager_id, company_id)
+    
+    context = {
+        'user': user,
+        'manager': manager,
+        'agents': agents,
+        'performance': performance_data
+    }
+    
+    return render(request, 'area_manager_dashboard.html', context)
+
+
+def division_head_dashboard_view(request):
+    """
+    Dashboard for Division Heads - Division oversight view
+    """
+    user = request.user
+    
+    # Check role
+    if user.get('role') != 'division_head':
+        return JsonResponse({'error': 'Access denied'}, status=403)
+    
+    # Get division head data
+    division_head_id = user.get('related_id')
+    company_id = user.get('company_id')
+    
+    if not division_head_id:
+        return JsonResponse({'error': 'Division Head profile not linked'}, status=400)
+    
+    division_head = DivisionHead.get(division_head_id)
+    if not division_head:
+        return JsonResponse({'error': 'Division Head not found'}, status=404)
+    
+    # Get area managers and agents under this division
+    area_managers = AreaManager.get_by_division_head(division_head_id)
+    
+    # Get performance data
+    performance_data = HierarchyPerformanceService.get_division_head_performance(division_head_id, company_id)
+    
+    context = {
+        'user': user,
+        'division_head': division_head,
+        'area_managers': area_managers,
+        'performance': performance_data
+    }
+    
+    return render(request, 'division_head_dashboard.html', context)
+
+
 def dashboard(request):
     """
     Main dashboard showing all agents with performance and predictions

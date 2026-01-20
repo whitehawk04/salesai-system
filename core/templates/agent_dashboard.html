@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block title %}Agent Dashboard - SalesAI{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Welcome, {{ user.name }}! 👤</h1>
+    <p class="subtitle">Sales Agent Dashboard</p>
+    
+    <div class="dashboard-grid">
+        <div class="card">
+            <h3>My Performance</h3>
+            <p>Monthly Target: ₱{{ agent.monthly_target|floatformat:0 }}</p>
+            <p>Current Sales: ₱{{ performance.total_sales|floatformat:0 }}</p>
+            <p>Achievement: {{ performance.achievement_rate|floatformat:1 }}%</p>
+        </div>
+        
+        <div class="card">
+            <h3>AI Prediction</h3>
+            <p>{{ predictions.message }}</p>
+            <p>Confidence: {{ predictions.confidence|floatformat:1 }}%</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
