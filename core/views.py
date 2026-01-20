@@ -11,6 +11,13 @@ from core.services.sales_funnel import SalesFunnelService
 from core.ai.trainer import AITrainer
 
 
+def landing_page(request):
+    """
+    Public landing page for the SalesAI system
+    """
+    return render(request, 'landing.html')
+
+
 def dashboard(request):
     """
     Main dashboard showing all agents with performance and predictions

@@ -15,6 +15,7 @@ class AuthenticationMiddleware:
     def __call__(self, request):
         # Public paths that don't require authentication
         public_paths = [
+            '/',  # Landing page
             '/register/',
             '/login/',
             '/api/register/',
@@ -73,6 +74,7 @@ class SubscriptionMiddleware:
     def __call__(self, request):
         # Skip for public paths and super admins
         public_paths = [
+            '/',  # Landing page
             '/register/',
             '/login/',
             '/api/register/',

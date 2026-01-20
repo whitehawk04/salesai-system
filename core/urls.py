@@ -8,8 +8,11 @@ from . import views_auth
 from . import views_subscription
 
 urlpatterns = [
+    # Landing page (public)
+    path('', views.landing_page, name='landing_page'),
+    
     # Dashboard and agent routes
-    path('', views.dashboard, name='dashboard'),
+    path('dashboard/', views.dashboard, name='dashboard'),
     path('agent/<str:agent_id>/', views.agent_detail, name='agent_detail'),
     path('train/', views.train_model, name='train_model'),
     path('api/agents/', views.api_agents, name='api_agents'),
