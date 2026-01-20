@@ -25,6 +25,7 @@ class AuthenticationMiddleware:
             '/static/',
             '/setup-database/',
             '/check-data/',
+            '/create-test-accounts/',
         ]
         
         # Check if path is public
@@ -89,6 +90,7 @@ class SubscriptionMiddleware:
             '/subscription/payment/',
             '/setup-database/',
             '/check-data/',
+            '/create-test-accounts/',
         ]
         
         is_public = any(request.path.startswith(path) for path in public_paths)

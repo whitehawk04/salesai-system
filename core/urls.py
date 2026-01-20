@@ -54,4 +54,5 @@ urlpatterns = [
     # Setup endpoints (for free tier deployment)
     path('setup-database/', views_setup.setup_database, name='setup_database'),
     path('check-data/', views_setup.check_data, name='check_data'),
+    path('create-test-accounts/', views_setup.create_test_accounts_endpoint, name='create_test_accounts'),
 ]
