@@ -280,6 +280,147 @@ def division_head_dashboard_view(request):
     return render(request, 'division_head_dashboard.html', context)
 
 
+def company_admin_dashboard(request):
+    """
+    Simplified Company Admin Dashboard - Works for new and existing companies
+    """
+    try:
+        user = request.user
+        
+        # Get basic user info
+        company_id = user.get('company_id') if user else None
+        
+        if not company_id:
+            context = {
+                'error': 'No company associated with this account',
+                'user': user,
+                'company': {'name': 'Unknown'},
+                'stats': get_empty_stats(),
+                'agents': [],
+                'recent_sales': [],
+                'subscription': {'status': 'unknown'},
+                'monthly_cost': 0
+            }
+            return render(request, 'company_admin_dashboard.html', context)
+        
+        # Import models
+        from core.models import Company, Subscription
+        from core.database import db
+        
+        # Get company
+        company = Company.get(company_id)
+        if not company:
+            company = {'name': 'Company Not Found', 'status': 'unknown'}
+        
+        # Get or create subscription
+        subscription = Subscription.get_by_company(company_id)
+        if not subscription:
+            try:
+                subscription = Subscription.create(
+                    subscription_id=f"SUB-{company_id}",
+                    company_id=company_id,
+                    billing_email=company.get('email', 'noemail@company.com'),
+                    trial_enabled=True
+                )
+            except:
+                subscription = {'status': 'trial', 'trial_end_date': None}
+        
+        # Get counts from database (simple and safe)
+        total_agents = db.agents.count_documents({"company_id": company_id})
+        total_area_managers = db.area_managers.count_documents({"company_id": company_id})
+        total_division_heads = db.division_heads.count_documents({"company_id": company_id})
+        total_leads = db.leads.count_documents({"company_id": company_id})
+        total_sales_count = db.sales.count_documents({"company_id": company_id})
+        
+        # Calculate total sales amount
+        sales_pipeline = [
+            {"$match": {"company_id": company_id}},
+            {"$group": {"_id": None, "total": {"$sum": "$amount"}}}
+        ]
+        sales_result = list(db.sales.aggregate(sales_pipeline))
+        total_sales = sales_result[0]['total'] if sales_result else 0
+        
+        # Calculate total target
+        target_pipeline = [
+            {"$match": {"company_id": company_id}},
+            {"$group": {"_id": None, "total": {"$sum": "$monthly_target"}}}
+        ]
+        target_result = list(db.agents.aggregate(target_pipeline))
+        total_target = target_result[0]['total'] if target_result else 0
+        
+        # Calculate achievement
+        achievement_rate = (total_sales / total_target * 100) if total_target > 0 else 0
+        
+        # Calculate monthly cost
+        monthly_cost = total_agents * 500  # ₱500 per agent
+        
+        # Get recent sales (simple query)
+        recent_sales = list(db.sales.find({"company_id": company_id}).sort("date", -1).limit(5))
+        
+        # Get agent list (simple)
+        agents_list = list(db.agents.find({"company_id": company_id}).limit(10))
+        
+        # Build context
+        context = {
+            'user': user,
+            'company': company,
+            'subscription': subscription,
+            'monthly_cost': monthly_cost,
+            'stats': {
+                'total_agents': total_agents,
+                'total_area_managers': total_area_managers,
+                'total_division_heads': total_division_heads,
+                'total_sales': total_sales,
+                'total_target': total_target,
+                'achievement_rate': achievement_rate,
+                'total_leads': total_leads,
+                'total_sales_count': total_sales_count,
+                'high_risk_agents': 0,  # We'll add this later
+                'medium_risk_agents': 0,
+                'low_risk_agents': 0
+            },
+            'agents': agents_list,
+            'recent_sales': recent_sales
+        }
+        
+        return render(request, 'company_admin_dashboard.html', context)
+        
+    except Exception as e:
+        import traceback
+        print(f"Dashboard Error: {str(e)}")
+        print(traceback.format_exc())
+        
+        context = {
+            'error': str(e),
+            'traceback': traceback.format_exc(),
+            'user': request.user if hasattr(request, 'user') else None,
+            'company': {'name': 'Error'},
+            'stats': get_empty_stats(),
+            'agents': [],
+            'recent_sales': [],
+            'subscription': {'status': 'unknown'},
+            'monthly_cost': 0
+        }
+        return render(request, 'company_admin_dashboard.html', context)
+
+
+def get_empty_stats():
+    """Return empty statistics dictionary"""
+    return {
+        'total_agents': 0,
+        'total_area_managers': 0,
+        'total_division_heads': 0,
+        'total_sales': 0,
+        'total_target': 0,
+        'achievement_rate': 0,
+        'total_leads': 0,
+        'total_sales_count': 0,
+        'high_risk_agents': 0,
+        'medium_risk_agents': 0,
+        'low_risk_agents': 0
+    }
+
+
 def dashboard(request):
     """
     Company Admin Dashboard - Comprehensive overview of entire organization

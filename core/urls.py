@@ -12,7 +12,7 @@ urlpatterns = [
     path('', views.landing_page, name='landing_page'),
     
     # Role-specific dashboards
-    path('dashboard/', views.dashboard, name='dashboard'),  # Company Admin dashboard
+    path('dashboard/', views.company_admin_dashboard, name='dashboard'),  # Company Admin dashboard (simplified)
     path('agent/dashboard/', views.agent_dashboard, name='agent_dashboard'),
     path('area-manager/dashboard/', views.area_manager_dashboard_view, name='area_manager_dashboard'),
     path('division-head/dashboard/', views.division_head_dashboard_view, name='division_head_dashboard'),
