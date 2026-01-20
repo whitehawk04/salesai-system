@@ -288,12 +288,33 @@ def dashboard(request):
         user = request.user
         company_id = user.get('company_id')
         
+        if not company_id:
+            return render(request, 'company_admin_dashboard.html', {
+                'error': 'Company ID not found in user session',
+                'user': user
+            })
+        
         # Import additional models
         from core.models import Company, Subscription, Sale, Lead
         
         # Get company info
         company = Company.get(company_id)
+        if not company:
+            return render(request, 'company_admin_dashboard.html', {
+                'error': 'Company not found',
+                'user': user
+            })
+        
         subscription = Subscription.get_by_company(company_id)
+        if not subscription:
+            # Create default subscription if it doesn't exist
+            from core.models.subscription import Subscription as SubModel
+            subscription = SubModel.create(
+                subscription_id=f"SUB-{company_id}",
+                company_id=company_id,
+                billing_email=company.get('email'),
+                trial_enabled=True
+            )
         
         # Get all organizational data
         agents = Agent.get_all(company_id)
@@ -348,7 +369,11 @@ def dashboard(request):
         achievement_rate = (total_sales / total_target * 100) if total_target > 0 else 0
         
         # Calculate monthly cost
-        monthly_cost = Subscription.calculate_monthly_cost(company_id)
+        try:
+            monthly_cost = Subscription.calculate_monthly_cost(company_id)
+        except:
+            # If calculation fails, use agent count * price per agent
+            monthly_cost = len(agents) * Subscription.PRICE_PER_AGENT
         
         # Sort agents by risk
         risk_order = {'HIGH': 0, 'MEDIUM': 1, 'LOW': 2, 'UNKNOWN': 3}
