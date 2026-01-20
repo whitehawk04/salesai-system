@@ -40,6 +40,10 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # Custom middleware for multi-tenant SaaS
+    'core.middleware.AuthenticationMiddleware',
+    'core.middleware.MultiTenantMiddleware',
+    'core.middleware.SubscriptionMiddleware',
 ]
 
 ROOT_URLCONF = 'salesAI.urls'
@@ -85,11 +89,15 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-# Internationalization
+# Internationalization - Philippine Settings
 LANGUAGE_CODE = 'en-us'
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Manila'  # Philippine timezone
 USE_I18N = True
 USE_TZ = True
+
+# Currency settings for Philippines
+CURRENCY = 'PHP'
+CURRENCY_SYMBOL = '₱'
 
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = 'static/'

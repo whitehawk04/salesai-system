@@ -9,12 +9,13 @@ class AreaManager:
     """Area Manager Model - Supervises multiple agents"""
     
     @staticmethod
-    def create(manager_id, name, email, division_head_id, area_name):
+    def create(manager_id, name, email, company_id, division_head_id, area_name):
         """Create a new area manager"""
         manager = {
             "_id": manager_id,
             "name": name,
             "email": email,
+            "company_id": company_id,  # Multi-tenant support
             "division_head_id": division_head_id,
             "area_name": area_name,
             "created_at": datetime.now()
@@ -28,9 +29,12 @@ class AreaManager:
         return db.area_managers.find_one({"_id": manager_id})
     
     @staticmethod
-    def get_all():
-        """Get all area managers"""
-        return list(db.area_managers.find())
+    def get_all(company_id=None):
+        """Get all area managers, optionally filtered by company"""
+        query = {}
+        if company_id:
+            query["company_id"] = company_id
+        return list(db.area_managers.find(query))
     
     @staticmethod
     def get_by_division_head(division_head_id):

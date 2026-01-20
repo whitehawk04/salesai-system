@@ -11,7 +11,7 @@ class Activity:
     TYPES = ['call', 'meeting', 'lead', 'deal']
     
     @staticmethod
-    def create(activity_id, agent_id, activity_type, value=0, notes=""):
+    def create(activity_id, agent_id, company_id, activity_type, value=0, notes=""):
         """Create a new activity"""
         if activity_type not in Activity.TYPES:
             raise ValueError(f"Invalid activity type. Must be one of: {Activity.TYPES}")
@@ -19,6 +19,7 @@ class Activity:
         activity = {
             "_id": activity_id,
             "agent_id": agent_id,
+            "company_id": company_id,  # Multi-tenant support
             "activity_type": activity_type,
             "value": value,
             "created_at": datetime.now(),  # Changed from "date" to "created_at"

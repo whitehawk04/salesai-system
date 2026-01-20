@@ -9,11 +9,12 @@ class Lead:
     """Lead Model - Potential customers with product interests"""
     
     @staticmethod
-    def create(lead_id, agent_id, customer_name, contact, product_id, status, value, notes=""):
+    def create(lead_id, agent_id, company_id, customer_name, contact, product_id, status, value, notes=""):
         """Create a new lead"""
         lead = {
             "_id": lead_id,
             "agent_id": agent_id,
+            "company_id": company_id,  # Multi-tenant support
             "customer_name": customer_name,
             "contact": contact,
             "product_id": product_id,
@@ -50,9 +51,12 @@ class Lead:
         )
     
     @staticmethod
-    def get_all():
-        """Get all leads"""
-        return list(db.leads.find())
+    def get_all(company_id=None):
+        """Get all leads, optionally filtered by company"""
+        query = {}
+        if company_id:
+            query["company_id"] = company_id
+        return list(db.leads.find(query))
     
     @staticmethod
     def exists(lead_id):

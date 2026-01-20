@@ -9,12 +9,13 @@ class DivisionHead:
     """Division Head Model - Oversees multiple area managers"""
     
     @staticmethod
-    def create(head_id, name, email, division_name):
+    def create(head_id, name, email, company_id, division_name):
         """Create a new division head"""
         head = {
             "_id": head_id,
             "name": name,
             "email": email,
+            "company_id": company_id,  # Multi-tenant support
             "division_name": division_name,
             "created_at": datetime.now()
         }
@@ -27,9 +28,12 @@ class DivisionHead:
         return db.division_heads.find_one({"_id": head_id})
     
     @staticmethod
-    def get_all():
-        """Get all division heads"""
-        return list(db.division_heads.find())
+    def get_all(company_id=None):
+        """Get all division heads, optionally filtered by company"""
+        query = {}
+        if company_id:
+            query["company_id"] = company_id
+        return list(db.division_heads.find(query))
     
     @staticmethod
     def update(head_id, **kwargs):

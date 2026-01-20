@@ -68,6 +68,31 @@ class MongoDB:
         self._ensure_connection()
         return self._db.leads
     
+    @property
+    def companies(self):
+        self._ensure_connection()
+        return self._db.companies
+    
+    @property
+    def subscriptions(self):
+        self._ensure_connection()
+        return self._db.subscriptions
+    
+    @property
+    def payments(self):
+        self._ensure_connection()
+        return self._db.payments
+    
+    @property
+    def payment_methods(self):
+        self._ensure_connection()
+        return self._db.payment_methods
+    
+    @property
+    def users(self):
+        self._ensure_connection()
+        return self._db.users
+    
     def close(self):
         if self._client:
             self._client.close()

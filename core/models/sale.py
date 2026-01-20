@@ -9,11 +9,12 @@ class Sale:
     """Sale Model for tracking completed sales"""
     
     @staticmethod
-    def create(sale_id, agent_id, amount, customer, product_id=None, notes=""):
+    def create(sale_id, agent_id, company_id, amount, customer, product_id=None, notes=""):
         """Create a new sale"""
         sale = {
             "_id": sale_id,
             "agent_id": agent_id,
+            "company_id": company_id,  # Multi-tenant support
             "amount": amount,
             "customer": customer,
             "product_id": product_id,
