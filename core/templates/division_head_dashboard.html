@@ -1,340 +1,432 @@
 {% extends 'base.html' %}
 
-{% block title %}Division Head Dashboard - {{ division_head.name }}{% endblock %}
-
-{% block extra_css %}
-<style>
-    .division-header {
-        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-        padding: 40px;
-        border-radius: 12px;
-        color: white;
-        margin-bottom: 32px;
-    }
-    
-    .division-header h1 {
-        font-size: 32px;
-        margin-bottom: 8px;
-    }
-    
-    .division-header p {
-        opacity: 0.9;
-        font-size: 16px;
-    }
-    
-    .summary-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-        gap: 16px;
-        margin-bottom: 32px;
-    }
-    
-    .summary-card {
-        background: #fff;
-        border: 1px solid #e9ecef;
-        padding: 24px;
-        border-radius: 8px;
-    }
-    
-    .summary-card h3 {
-        font-size: 28px;
-        font-weight: 600;
-        margin-bottom: 4px;
-        color: #212529;
-    }
-    
-    .summary-card p {
-        font-size: 14px;
-        color: #6c757d;
-        font-weight: 500;
-    }
-    
-    .summary-card.highlight {
-        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-        color: white;
-        border: none;
-    }
-    
-    .summary-card.highlight h3,
-    .summary-card.highlight p {
-        color: white;
-    }
-    
-    .risk-summary {
-        display: flex;
-        gap: 16px;
-        align-items: center;
-    }
-    
-    .risk-item {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
-    
-    .risk-dot {
-        width: 12px;
-        height: 12px;
-        border-radius: 50%;
-    }
-    
-    .risk-dot.high { background: #c53030; }
-    .risk-dot.medium { background: #d97706; }
-    .risk-dot.low { background: #15803d; }
-    
-    .areas-section {
-        margin-top: 32px;
-    }
-    
-    .areas-section h2 {
-        font-size: 20px;
-        font-weight: 600;
-        margin-bottom: 16px;
-        color: #212529;
-    }
-    
-    .areas-grid {
-        display: grid;
-        gap: 24px;
-    }
-    
-    .area-card {
-        background: #fff;
-        border: 1px solid #e9ecef;
-        border-radius: 8px;
-        padding: 24px;
-        transition: all 0.2s;
-    }
-    
-    .area-card:hover {
-        border-color: #dee2e6;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    }
-    
-    .area-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 24px;
-        padding-bottom: 16px;
-        border-bottom: 2px solid #e9ecef;
-    }
-    
-    .area-info h3 {
-        font-size: 20px;
-        font-weight: 600;
-        color: #212529;
-        margin-bottom: 4px;
-    }
-    
-    .area-info p {
-        font-size: 14px;
-        color: #6c757d;
-    }
-    
-    .area-metrics {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 16px;
-        margin-bottom: 20px;
-    }
-    
-    .area-metric {
-        text-align: center;
-        padding: 16px;
-        background: #f8f9fa;
-        border-radius: 6px;
-    }
-    
-    .area-metric-value {
-        font-size: 24px;
-        font-weight: 600;
-        color: #212529;
-    }
-    
-    .area-metric-label {
-        font-size: 12px;
-        color: #6c757d;
-        margin-top: 4px;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-    
-    .progress-bar {
-        width: 100%;
-        height: 10px;
-        background: #e9ecef;
-        border-radius: 5px;
-        overflow: hidden;
-        margin: 12px 0;
-    }
-    
-    .progress-fill {
-        height: 100%;
-        background: linear-gradient(90deg, #f093fb 0%, #f5576c 100%);
-        transition: width 0.3s ease;
-    }
-    
-    .progress-label {
-        font-size: 14px;
-        color: #495057;
-        font-weight: 500;
-    }
-    
-    .risk-badges {
-        display: flex;
-        gap: 12px;
-        margin-top: 16px;
-    }
-    
-    .risk-badge-item {
-        padding: 8px 16px;
-        border-radius: 6px;
-        font-size: 13px;
-        font-weight: 500;
-    }
-    
-    .risk-badge-item.high {
-        background: #fff5f5;
-        color: #c53030;
-        border: 1px solid #fc8181;
-    }
-    
-    .risk-badge-item.medium {
-        background: #fffbeb;
-        color: #d97706;
-        border: 1px solid #fbbf24;
-    }
-    
-    .risk-badge-item.low {
-        background: #f0fdf4;
-        color: #15803d;
-        border: 1px solid #86efac;
-    }
-    
-    .view-details-btn {
-        display: inline-block;
-        padding: 10px 20px;
-        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-        color: white;
-        text-decoration: none;
-        border-radius: 6px;
-        font-weight: 500;
-        font-size: 14px;
-        transition: all 0.2s;
-    }
-    
-    .view-details-btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(240, 147, 251, 0.4);
-    }
-</style>
-{% endblock %}
+{% block title %}Division Head Dashboard - SalesAI{% endblock %}
 
 {% block content %}
-{% if error %}
-    <div class="alert alert-error">
-        <strong>Error:</strong> {{ error }}
-    </div>
-{% else %}
-    <div class="division-header">
-        <h1>{{ division_head.name }}</h1>
-        <p>{{ division_head.division_name }} • {{ division_head.email }}</p>
-    </div>
-    
-    <div class="summary-grid">
-        <div class="summary-card highlight">
-            <h3>{{ summary.total_areas }}</h3>
-            <p>Areas</p>
+<div class="division-dashboard">
+    <!-- Header Section -->
+    <div class="dashboard-header">
+        <div class="header-content">
+            <h1>👔 Division Head Dashboard</h1>
+            <p class="subtitle">Welcome, {{ user.name }}!</p>
+            {% if division_head %}
+            <p class="division-name">{{ division_head.division_name }}</p>
+            {% endif %}
         </div>
-        <div class="summary-card">
-            <h3>{{ summary.total_agents }}</h3>
-            <p>Total Agents</p>
-        </div>
-        <div class="summary-card">
-            <h3>₱{{ summary.total_sales|floatformat:0 }}</h3>
-            <p>Total Sales</p>
-        </div>
-        <div class="summary-card">
-            <h3>{{ summary.achievement_percentage|floatformat:1 }}%</h3>
-            <p>Achievement</p>
-        </div>
-        <div class="summary-card">
-            <h3>{{ summary.average_score|floatformat:1 }}%</h3>
-            <p>Avg Score</p>
+        <div class="header-actions">
+            <a href="/logout/" class="btn btn-outline">
+                <span class="icon">🚪</span> Logout
+            </a>
         </div>
     </div>
-    
-    <div class="summary-card">
-        <p style="margin-bottom: 12px; font-weight: 600;">Division Risk Distribution</p>
-        <div class="risk-summary">
-            <div class="risk-item">
-                <div class="risk-dot high"></div>
-                <span>{{ summary.high_risk_count }} High Risk Agents</span>
-            </div>
-            <div class="risk-item">
-                <div class="risk-dot medium"></div>
-                <span>{{ summary.medium_risk_count }} Medium Risk Agents</span>
-            </div>
-            <div class="risk-item">
-                <div class="risk-dot low"></div>
-                <span>{{ summary.low_risk_count }} Low Risk Agents</span>
+
+    <!-- Division Statistics -->
+    <div class="stats-grid">
+        {% if performance %}
+        <div class="stat-card">
+            <div class="stat-icon" style="background: #dbeafe;">👨‍💻</div>
+            <div class="stat-content">
+                <h3>{{ performance.total_area_managers|default:0 }}</h3>
+                <p>Area Managers</p>
             </div>
         </div>
+
+        <div class="stat-card">
+            <div class="stat-icon" style="background: #fef3c7;">👥</div>
+            <div class="stat-content">
+                <h3>{{ performance.total_agents|default:0 }}</h3>
+                <p>Total Agents</p>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon" style="background: #d1fae5;">💰</div>
+            <div class="stat-content">
+                <h3>₱{{ performance.total_sales|floatformat:0|default:"0" }}</h3>
+                <p>Division Sales</p>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon" style="background: #e0e7ff;">🎯</div>
+            <div class="stat-content">
+                <h3>{{ performance.achievement_rate|floatformat:1|default:"0" }}%</h3>
+                <p>Achievement Rate</p>
+            </div>
+        </div>
+        {% else %}
+        <div class="stat-card">
+            <div class="stat-icon" style="background: #f3f4f6;">📊</div>
+            <div class="stat-content">
+                <h3>-</h3>
+                <p>No data available</p>
+            </div>
+        </div>
+        {% endif %}
     </div>
-    
-    {% if areas %}
-    <div class="areas-section">
-        <h2>Area Performance Overview</h2>
-        <div class="areas-grid">
-            {% for area in areas %}
-            <div class="area-card">
-                <div class="area-header">
-                    <div class="area-info">
-                        <h3>{{ area.manager.name }}</h3>
-                        <p>{{ area.manager.area_name }} • {{ area.summary.total_agents }} agents</p>
-                    </div>
-                    <a href="{% url 'area_manager_dashboard' area.manager_id %}" class="view-details-btn">View Details</a>
+
+    <!-- Area Managers Overview -->
+    <div class="card">
+        <h2>📊 Area Managers Performance</h2>
+        {% if area_managers %}
+        <div class="managers-grid">
+            {% for manager in area_managers %}
+            <div class="manager-card">
+                <div class="manager-header">
+                    <h3>{{ manager.name }}</h3>
+                    <span class="area-badge">{{ manager.area_name }}</span>
                 </div>
-                
-                <div class="area-metrics">
-                    <div class="area-metric">
-                        <div class="area-metric-value">₱{{ area.summary.total_sales|floatformat:0 }}</div>
-                        <div class="area-metric-label">Sales</div>
+                <div class="manager-stats">
+                    <div class="stat-item">
+                        <span class="stat-label">Agents</span>
+                        <span class="stat-value">{{ manager.agent_count|default:0 }}</span>
                     </div>
-                    <div class="area-metric">
-                        <div class="area-metric-value">₱{{ area.summary.total_target|floatformat:0 }}</div>
-                        <div class="area-metric-label">Target</div>
+                    <div class="stat-item">
+                        <span class="stat-label">Target</span>
+                        <span class="stat-value">₱{{ manager.target|floatformat:0|default:"0" }}</span>
                     </div>
-                    <div class="area-metric">
-                        <div class="area-metric-value">{{ area.summary.achievement_percentage|floatformat:1 }}%</div>
-                        <div class="area-metric-label">Achievement</div>
+                    <div class="stat-item">
+                        <span class="stat-label">Sales</span>
+                        <span class="stat-value">₱{{ manager.sales|floatformat:0|default:"0" }}</span>
                     </div>
-                    <div class="area-metric">
-                        <div class="area-metric-value">{{ area.summary.average_score|floatformat:1 }}%</div>
-                        <div class="area-metric-label">Avg Score</div>
+                    <div class="stat-item">
+                        <span class="stat-label">Achievement</span>
+                        <span class="stat-value">{{ manager.achievement|floatformat:1|default:"0" }}%</span>
                     </div>
                 </div>
-                
-                <div>
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                        <span style="font-size: 14px; font-weight: 500; color: #495057;">Target Achievement</span>
-                        <span style="font-size: 14px; font-weight: 600; color: #212529;">{{ area.summary.achievement_percentage|floatformat:1 }}%</span>
-                    </div>
+                <div class="manager-progress">
                     <div class="progress-bar">
-                        <div class="progress-fill" style="width: {{ area.summary.achievement_percentage|floatformat:0 }}%"></div>
+                        <div class="progress-fill" style="width: {{ manager.achievement|default:0 }}%"></div>
                     </div>
-                </div>
-                
-                <div class="risk-badges">
-                    <div class="risk-badge-item high">{{ area.summary.high_risk_count }} High</div>
-                    <div class="risk-badge-item medium">{{ area.summary.medium_risk_count }} Medium</div>
-                    <div class="risk-badge-item low">{{ area.summary.low_risk_count }} Low</div>
                 </div>
             </div>
             {% endfor %}
         </div>
+        {% else %}
+        <p class="no-data">No area managers found in your division</p>
+        {% endif %}
     </div>
-    {% endif %}
-{% endif %}
+
+    <!-- Top Performing Agents -->
+    <div class="card">
+        <h2>⭐ Top Performing Agents</h2>
+        {% if performance.top_agents %}
+        <div class="agents-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Agent</th>
+                        <th>Area Manager</th>
+                        <th>Target</th>
+                        <th>Sales</th>
+                        <th>Achievement</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for agent in performance.top_agents %}
+                    <tr>
+                        <td><strong>{{ agent.name }}</strong></td>
+                        <td>{{ agent.area_manager_name|default:"-" }}</td>
+                        <td>₱{{ agent.target|floatformat:0 }}</td>
+                        <td>₱{{ agent.sales|floatformat:0 }}</td>
+                        <td>{{ agent.achievement|floatformat:1 }}%</td>
+                        <td><span class="status-badge {{ agent.status }}">{{ agent.status }}</span></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="no-data">No agent data available</p>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+    .division-dashboard {
+        padding: 2rem;
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    .dashboard-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .header-content h1 {
+        font-size: 2rem;
+        color: #1f2937;
+        margin-bottom: 0.5rem;
+    }
+
+    .subtitle {
+        color: #6b7280;
+        font-size: 1.1rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .division-name {
+        color: #667eea;
+        font-size: 1.2rem;
+        font-weight: 600;
+    }
+
+    .header-actions {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .btn-outline {
+        background: white;
+        color: #667eea;
+        border: 2px solid #667eea;
+    }
+
+    .btn-outline:hover {
+        background: #667eea;
+        color: white;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .stat-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+    }
+
+    .stat-content h3 {
+        font-size: 1.8rem;
+        color: #1f2937;
+        margin-bottom: 0.25rem;
+    }
+
+    .stat-content p {
+        color: #6b7280;
+        font-size: 0.9rem;
+    }
+
+    .card {
+        background: white;
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+    }
+
+    .card h2 {
+        margin-bottom: 1.5rem;
+        color: #1f2937;
+    }
+
+    .managers-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .manager-card {
+        background: #f9fafb;
+        padding: 1.5rem;
+        border-radius: 12px;
+        border-left: 4px solid #667eea;
+        transition: all 0.3s ease;
+    }
+
+    .manager-card:hover {
+        background: #f3f4f6;
+        transform: translateX(5px);
+    }
+
+    .manager-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+    .manager-header h3 {
+        color: #1f2937;
+        font-size: 1.2rem;
+    }
+
+    .area-badge {
+        background: #667eea;
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 12px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .manager-stats {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+    }
+
+    .stat-item {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .stat-label {
+        color: #6b7280;
+        font-size: 0.85rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .stat-value {
+        color: #1f2937;
+        font-weight: 600;
+        font-size: 1.1rem;
+    }
+
+    .manager-progress {
+        margin-top: 1rem;
+    }
+
+    .progress-bar {
+        height: 8px;
+        background: #e5e7eb;
+        border-radius: 4px;
+        overflow: hidden;
+    }
+
+    .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        transition: width 0.5s ease;
+    }
+
+    .agents-table {
+        overflow-x: auto;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    thead {
+        background: #f9fafb;
+    }
+
+    th {
+        padding: 1rem;
+        text-align: left;
+        font-weight: 600;
+        color: #1f2937;
+        border-bottom: 2px solid #e5e7eb;
+    }
+
+    td {
+        padding: 1rem;
+        border-bottom: 1px solid #e5e7eb;
+        color: #6b7280;
+    }
+
+    tbody tr:hover {
+        background: #f9fafb;
+    }
+
+    .status-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 12px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .status-badge.on-track {
+        background: #d1fae5;
+        color: #065f46;
+    }
+
+    .status-badge.at-risk {
+        background: #fed7aa;
+        color: #92400e;
+    }
+
+    .status-badge.critical {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .no-data {
+        text-align: center;
+        color: #6b7280;
+        padding: 2rem;
+    }
+
+    @media (max-width: 768px) {
+        .division-dashboard {
+            padding: 1rem;
+        }
+
+        .dashboard-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .managers-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .agents-table {
+            font-size: 0.85rem;
+        }
+
+        th, td {
+            padding: 0.5rem;
+        }
+    }
+</style>
 {% endblock %}

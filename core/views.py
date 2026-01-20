@@ -40,8 +40,52 @@ def agent_dashboard(request):
         return JsonResponse({'error': 'Agent not found'}, status=404)
     
     # Get performance metrics
+    from core.models import Sale, Lead
+    from core.database import db
+    
     performance = PerformanceService.get_agent_performance(agent_id, company_id)
-    predictions = PredictorService.get_agent_predictions(agent_id)
+    
+    # Get AI predictions
+    try:
+        predictions = PredictorService.predict_agent(agent_id)
+    except:
+        predictions = {
+            'prediction': 'Not enough data for prediction',
+            'risk_level': 'UNKNOWN',
+            'confidence': 0,
+            'recommendations': []
+        }
+    
+    # Get recent sales
+    recent_sales = list(db.sales.find({"agent_id": agent_id}).sort("date", -1).limit(5))
+    
+    # Get active leads
+    active_leads = list(db.leads.find({
+        "agent_id": agent_id,
+        "status": {"$in": ["New", "Contacted", "Qualified", "Proposal", "Negotiation"]}
+    }).limit(10))
+    
+    # Calculate additional metrics
+    total_sales_count = db.sales.count_documents({"agent_id": agent_id})
+    total_leads = db.leads.count_documents({"agent_id": agent_id})
+    
+    conversion_rate = (total_sales_count / total_leads * 100) if total_leads > 0 else 0
+    
+    # Calculate average sale amount
+    pipeline = [
+        {"$match": {"agent_id": agent_id}},
+        {"$group": {"_id": None, "avg_amount": {"$avg": "$amount"}}}
+    ]
+    avg_result = list(db.sales.aggregate(pipeline))
+    avg_sale_amount = avg_result[0]['avg_amount'] if avg_result else 0
+    
+    # Add computed fields to performance
+    performance['total_sales_count'] = total_sales_count
+    performance['total_leads'] = total_leads
+    performance['conversion_rate'] = conversion_rate
+    performance['avg_sale_amount'] = avg_sale_amount
+    performance['recent_sales'] = recent_sales
+    performance['active_leads'] = active_leads
     
     context = {
         'user': user,
@@ -77,13 +121,76 @@ def area_manager_dashboard_view(request):
     # Get agents under this manager
     agents = Agent.get_by_area_manager(manager_id)
     
-    # Get performance data
-    performance_data = HierarchyPerformanceService.get_area_manager_performance(manager_id, company_id)
+    # Calculate performance metrics
+    total_sales = 0
+    total_target = 0
+    high_risk_count = 0
+    medium_risk_count = 0
+    on_track_count = 0
+    needs_support_count = 0
+    
+    top_performer = None
+    top_achievement = 0
+    
+    agents_with_data = []
+    
+    for agent in agents:
+        agent_id = agent['_id']
+        perf = PerformanceService.get_agent_performance(agent_id, company_id)
+        
+        total_sales += perf.get('total_sales', 0)
+        total_target += agent.get('monthly_target', 0)
+        
+        achievement = perf.get('achievement_rate', 0)
+        
+        # Get predictions
+        try:
+            pred = PredictorService.predict_agent(agent_id)
+            risk_level = pred.get('risk_level', 'UNKNOWN')
+        except:
+            risk_level = 'UNKNOWN'
+        
+        if risk_level == 'HIGH':
+            high_risk_count += 1
+        elif risk_level == 'MEDIUM':
+            medium_risk_count += 1
+        
+        if achievement >= 80:
+            on_track_count += 1
+        else:
+            needs_support_count += 1
+        
+        # Track top performer
+        if achievement > top_achievement:
+            top_achievement = achievement
+            top_performer = {'name': agent['name'], 'achievement': achievement}
+        
+        # Add data to agent
+        agent_data = dict(agent)
+        agent_data['current_sales'] = perf.get('total_sales', 0)
+        agent_data['achievement'] = achievement
+        agent_data['risk_level'] = risk_level
+        agents_with_data.append(agent_data)
+    
+    achievement_rate = (total_sales / total_target * 100) if total_target > 0 else 0
+    avg_achievement = achievement_rate
+    
+    performance_data = {
+        'total_sales': total_sales,
+        'total_target': total_target,
+        'achievement_rate': achievement_rate,
+        'high_risk_count': high_risk_count,
+        'medium_risk_count': medium_risk_count,
+        'on_track_count': on_track_count,
+        'needs_support_count': needs_support_count,
+        'top_performer': top_performer,
+        'avg_achievement': avg_achievement
+    }
     
     context = {
         'user': user,
         'manager': manager,
-        'agents': agents,
+        'agents': agents_with_data,
         'performance': performance_data
     }
     
@@ -111,16 +218,62 @@ def division_head_dashboard_view(request):
     if not division_head:
         return JsonResponse({'error': 'Division Head not found'}, status=404)
     
-    # Get area managers and agents under this division
+    # Get area managers under this division
     area_managers = AreaManager.get_by_division_head(division_head_id)
     
-    # Get performance data
-    performance_data = HierarchyPerformanceService.get_division_head_performance(division_head_id, company_id)
+    # Calculate division-wide metrics
+    total_sales = 0
+    total_target = 0
+    total_agents = 0
+    
+    managers_with_data = []
+    
+    for manager in area_managers:
+        manager_id = manager['_id']
+        
+        # Get agents under this manager
+        agents = Agent.get_by_area_manager(manager_id)
+        agent_count = len(agents)
+        total_agents += agent_count
+        
+        # Calculate manager's team performance
+        manager_sales = 0
+        manager_target = 0
+        
+        for agent in agents:
+            agent_id = agent['_id']
+            perf = PerformanceService.get_agent_performance(agent_id, company_id)
+            manager_sales += perf.get('total_sales', 0)
+            manager_target += agent.get('monthly_target', 0)
+        
+        total_sales += manager_sales
+        total_target += manager_target
+        
+        manager_achievement = (manager_sales / manager_target * 100) if manager_target > 0 else 0
+        
+        # Add data to manager
+        manager_data = dict(manager)
+        manager_data['agent_count'] = agent_count
+        manager_data['sales'] = manager_sales
+        manager_data['target'] = manager_target
+        manager_data['achievement'] = manager_achievement
+        managers_with_data.append(manager_data)
+    
+    achievement_rate = (total_sales / total_target * 100) if total_target > 0 else 0
+    
+    performance_data = {
+        'total_area_managers': len(area_managers),
+        'total_agents': total_agents,
+        'total_sales': total_sales,
+        'total_target': total_target,
+        'achievement_rate': achievement_rate,
+        'top_agents': []  # Could add top performing agents across division
+    }
     
     context = {
         'user': user,
         'division_head': division_head,
-        'area_managers': area_managers,
+        'area_managers': managers_with_data,
         'performance': performance_data
     }
     
